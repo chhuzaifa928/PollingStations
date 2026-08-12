@@ -1,0 +1,91 @@
+﻿@{
+    Layout = "~/Views/Shared/_EconomicUnits.cshtml";
+    <link rel="stylesheet" href="~/Content/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+
+        .c2 {
+            padding: 5px;
+        }
+        
+    </style>
+}
+
+<h2 class="mb-4">Add New Notable</h2>
+
+<form>
+    <div style="background-color:lightyellow; padding:5px;">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" placeholder="Full Name">
+            </div>
+            <div class="col-md-4">
+                <label for="bradri" class="form-label">Bradri</label>
+                <input type="text" class="form-control" id="bradri" placeholder="Bradri / Caste">
+            </div>
+            <div class="col-md-4">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control" id="address" placeholder="Village or Area">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="mobile" class="form-label">Mobile</label>
+                <input type="text" class="form-control" id="mobile" placeholder="e.g. 03001234567">
+            </div>
+            <div class="col-md-4">
+                <label for="whatsapp" class="form-label">WhatsApp</label>
+                <input type="text" class="form-control" id="whatsapp" placeholder="Same or different number">
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="button" class="btn btn-primary w-100" style="margin-top:25px;">Save</button>
+            </div>
+        </div>
+    </div>
+            
+            
+</form>
+<div class="row">
+    <div class="col-sm-12">
+        <h2>Existing Notables</h2>
+        <table class="table table-bordered table-striped">
+            <thead class="bg-primary">
+                <tr>
+                    <th>Name</th>
+                    <th>Bradri</th>
+                    <th>Address</th>
+                    <th>Mobile</th>
+                    <th>WhatsApp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Chaudhry Imran</td>
+                    <td>Gujjar</td>
+                    <td>Chak 45</td>
+                    <td>03001234567</td>
+                    <td>03001234567</td>
+                </tr>
+                <tr>
+                    <td>Malik Asif</td>
+                    <td>Awan</td>
+                    <td>Kot Momin</td>
+                    <td>03007654321</td>
+                    <td>03111234567</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+    
+
+
+
+
+@section scripts{
+    <script src="~/script/js/jquery.dataTables.min.js"></script>
+  
+
+}

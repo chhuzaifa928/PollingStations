@@ -1,0 +1,41 @@
+@model NID.Areas.ElectionTransport.Models.TransportPageViewModel
+<div class="et-shell">
+    <header class="et-command-header">
+        <div class="et-brand-block">
+            <div class="et-brand-mark">ET</div>
+            <div>
+                <div class="et-kicker">Pakistan Election Day Operations</div>
+                <h1>@Model.PageTitle</h1>
+                <div class="et-context-line">
+                    @Model.SelectedContext.ElectionYear · @Model.SelectedContext.Election ·
+                    @Model.SelectedContext.Assembly · <strong>@Model.SelectedContext.Seat</strong>
+                </div>
+            </div>
+        </div>
+        <div class="et-header-actions">
+            <label for="et-context-selector">Constituency</label>
+            <select id="et-context-selector" class="et-select" data-url="@Url.Action("Index", "CommandCentre", new { area = "ElectionTransport", contextId = "__context__" })">
+                @foreach (var item in Model.Contexts)
+                {
+                    <option value="@item.ElectionContextId" @(item.ElectionContextId == Model.ElectionContextId ? "selected" : null)>
+                        @item.DisplayText
+                    </option>
+                }
+            </select>
+            <div class="et-live-chip"><span></span> LIVE COMMAND</div>
+        </div>
+    </header>
+
+    <nav class="et-nav">
+        <a class="@(Model.ActivePage == "dashboard" ? "active" : null)" href="@Url.Action("Index", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Overview</a>
+        <a class="@(Model.ActivePage == "map" ? "active" : null)" href="@Url.Action("LiveMap", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Live Map</a>
+        <a class="@(Model.ActivePage == "stations" ? "active" : null)" href="@Url.Action("PollingStations", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Polling Stations</a>
+        <a class="@(Model.ActivePage == "vehicles" ? "active" : null)" href="@Url.Action("Vehicles", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Vehicles</a>
+        <a class="@(Model.ActivePage == "providers" ? "active" : null)" href="@Url.Action("Providers", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Providers</a>
+        <a class="@(Model.ActivePage == "requests" ? "active" : null)" href="@Url.Action("Requests", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Transport Requests</a>
+        <a class="@(Model.ActivePage == "trips" ? "active" : null)" href="@Url.Action("Trips", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Trips</a>
+        <a class="@(Model.ActivePage == "exceptions" ? "active" : null)" href="@Url.Action("Exceptions", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Exceptions</a>
+        <a class="@(Model.ActivePage == "analytics" ? "active" : null)" href="@Url.Action("Analytics", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Analytics</a>
+        <a class="public-link" target="_blank" href="@Url.Action("Request", "PublicTransport", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Public Request Portal</a>
+    </nav>
+</div>

@@ -1,0 +1,355 @@
+﻿@{
+    Layout = "~/Views/Shared/_EconomicUnits.cshtml";
+    <link rel="stylesheet" href="~/Content/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="~/Content/css/leaflet.css" />
+    <link rel="stylesheet" href="~/Content/css/Control.FullScreen.css" />
+    <link rel="stylesheet" href="~/Content/css/font-awesome.min.css" />
+
+    <style>
+
+
+        .highcharts-figure {
+            margin: 0;
+        }
+
+        #play-controls {
+            max-width: 1000px;
+            margin: 1em auto;
+        }
+
+        #container {
+            height: 900px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        #info-table {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+            font-size: 13px;
+            display: none;
+        }
+
+
+        .map-title, .map-value {
+            font-size: 18px;
+        }
+
+        .leaflet-popup-content {
+            font-size: 10px;
+        }
+
+        .leaflet-container-fullscreen .leaflet-popup-content {
+            font-size: 18px;
+        }
+
+        .leaflet-container-fullscreen .leaflet-control {
+            font-size: 16px;
+        }
+
+        .info.legend.leaflet-control {
+            background: white;
+            padding: 8px 12px;
+            font-family: Arial, sans-serif;
+            font-size: 12px; /* default font size */
+            color: #333;
+            line-height: 1.4; /* default spacing */
+            border-radius: 5px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.15);
+            max-width: 250px;
+        }
+
+            /* The color boxes inside legend */
+            .info.legend.leaflet-control i {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                margin-right: 8px;
+                border: 1px solid #999;
+                vertical-align: middle;
+                border-radius: 3px;
+            }
+
+            /* Increase spacing between legend lines */
+            .info.legend.leaflet-control br {
+                line-height: 1.8;
+            }
+
+        /* === Fullscreen mode adjustments === */
+        /* Leaflet fullscreen plugin adds class leaflet-fullscreen-on to the map */
+
+        .leaflet-fullscreen-on .info.legend.leaflet-control {
+            font-size: 18px; /* bigger font */
+            padding: 14px 20px;
+            max-width: 280px;
+            line-height: 2; /* bigger line height */
+        }
+
+            .leaflet-fullscreen-on .info.legend.leaflet-control i {
+                width: 28px; /* bigger color boxes */
+                height: 28px;
+                margin-right: 12px;
+                border-width: 2px;
+                border-radius: 5px;
+            }
+
+            .leaflet-fullscreen-on .info.legend.leaflet-control br {
+                line-height: 2.5; /* bigger spacing between lines */
+            }
+
+
+        .cdu {
+            position: relative;
+            min-height: 1px;
+            padding: 5px;
+        }
+
+        .cdu {
+            width: 50%;
+            float: left;
+        }
+        .uhold.active {
+            background-color:ghostwhite;
+            border-color: red;
+            color:red;
+        }
+
+        .uhold {
+            background-color: white;
+            border: solid 2px black;
+            color: black;
+            position: relative;
+            padding: 5px;
+            height: 50px;
+            border-radius: 7px;
+        }
+
+
+        .timg {
+            height: 36px;
+            width: auto;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+
+        .unum {
+            position: absolute;
+            bottom: 0px;
+            left: 5px;
+            font-weight: bold;
+        }
+
+        .utit {
+            font-size: 12px;
+            position: absolute;
+            top: 0px;
+            left: 5px;
+        }
+
+        .c2 {
+            padding: 5px;
+        }
+	
+    </style>
+}
+
+
+<div class="row">
+
+    <div class="col-sm-2 c2">
+        <select id="election" class="form-control">
+            <option value="GE2024">GE2024</option>
+            <option value="BY2024">By-Election 2024</option>
+            <option value="GE2018">GE2018</option>
+            <option value="GE2013">GE2013</option>
+            <option value="GE2008">GE2008</option>
+        </select>
+    </div>
+    <div class="col-sm-2 c2">
+        <select id="province" class="form-control">
+            <option value="0">--Select Province--</option>
+        </select>
+    </div>
+    <div class="col-sm-2 c2">
+        <select id="division" class="form-control">
+            <option value="0">--Select Division--</option>
+        </select>
+    </div>
+    <div class="col-sm-2 c2">
+        <select id="district" class="form-control">
+            <option value="0">--Select District--</option>
+        </select>
+    </div>
+    <div class="col-sm-2 c2">
+        <select id="assembly" class="form-control">
+            <option value="NA">National Assemebly</option>
+            <option value="PP">Punjab Assemebly</option>
+            <option value="PS">Sindh Assemebly</option>
+            <option value="PK">KPK Assemebly</option>
+            <option value="PB">Balochistan Assemebly</option>
+            <option value="AJK">AJK Assemebly</option>
+            <option value="GB">GB Assemebly</option>
+        </select>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-sm-8 rp" style="margin-bottom:7px; position:relative; ">
+        <div class="partition">
+            <div style="float:left;">
+
+                <select id="cmap_level">
+                    <option value="ds" selected>Districts</option>
+                    <option value="dv">Divisions</option>
+                    <option value="pv">Provinces</option>
+                </select>
+            </div>
+            <div style="clear:both; height:400px;" id="c_map"></div>
+        </div>
+
+        <div id="map" style="clear: both; overflow: hidden; height: 700px; position: relative;" class="chart">
+        </div>
+
+        <div id="info-table">
+            <button type="button" class="btn-close btn-sm float-end" onclick="$('#info-table').hide();"></button>
+            <table class="table table-bordered table-sm mb-0" id="marker-details-table">
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/script/js/jquery.dataTables.min.js"></script>
+    <script src="~/script/js/leaflet.js"></script>
+    <script src="~/script/js/Control.FullScreen.js"></script>
+
+    <script src="~/script/site/mymap.js"></script>
+    <script>
+        $(document).ready(function () {
+            var CLICKED;
+            var FRAME = [];
+            var PV = [];
+            var DV = [];
+            var DS = [];
+
+            var MAP_DATA = [];
+            var MAP_POL = [];
+            var ACTIVE_LEVEL = null;
+            requestFrame();
+            
+            
+
+            $(document).on('click', '.uhold', function () {
+                $(".uhold").removeClass("active");
+                $(this).addClass("active");
+                var unumId = $(this).find('.unum').attr('id');
+                $(".unum").removeClass("active");
+                $("#"+unumId).addClass("active");
+            });
+
+            $("#province").on("change", function () {
+                var v = $(this).val();
+                CLICKED = $(this).find('.utit').text();
+                var filtered = FRAME.filter(function (item) {
+                    return item.pvid === v;
+                });
+                DV = [];
+                filtered.forEach(function (item) {
+                    DV.push({ "id": item.dvid, "name": item.dv });
+                });
+                //alert(JSON.stringify(filtered));
+                displayArea('#division', 'Division', DV);
+            });
+
+            $("#division").on("change", function () {
+                var v = $(this).val();
+                var filtered = FRAME.filter(function (item) {
+                    return item.dvid === v;
+                });
+                DS = [];
+                filtered.forEach(function (item) {
+                    DS.push({ "id": item.dsid, "name": item.ds });
+                });
+                //alert(JSON.stringify(filtered));
+                displayArea('#district', 'District', DS);
+            });
+
+
+
+            function requestFrame() {
+                $.get("/Home/GetFrame/", function (response) {
+                    if (response.data.length != 0) {
+                        FRAME = response.data;
+                        FRAME.forEach(function (item) {
+                            PV.push({"id":item.pvid, "name":item.pv});
+                        });
+                        FRAME.forEach(function (item) {
+                            DV.push({"id":item.dvid, "name":item.dv});
+                        });
+                        FRAME.forEach(function (item) {
+                            DS.push({"id":item.dsid, "name":item.ds});
+                        });
+                        displayArea('#province','Province',PV);
+                        displayArea('#division','Division',DV);
+                        displayArea('#district', 'District', DS);
+                        $('#province').trigger('change');
+                        $('#unm4').closest('.uhold').trigger('click');
+
+                        
+                    }
+                });
+            }
+
+            
+
+            function displayArea(sid, name, AREA) {
+                let uniqueProvinces = [];
+                let seenIds = new Set();
+
+                $.each(AREA, function (index, item) {
+                    if (!seenIds.has(item.id)) {
+                        seenIds.add(item.id);
+                        uniqueProvinces.push(item);
+                    }
+                });
+
+                // Step 2: Populate the select dropdown
+                $(sid).html('<option value="">--Select '+name+'--</option>');
+
+                $.each(uniqueProvinces, function (index, item) {
+                    $(sid).append($('<option>', {
+                        value: item.id,
+                        text: item.name
+                    }));
+                });
+            }
+
+
+
+            
+
+
+
+
+            
+
+
+
+
+
+        });
+
+    </script>
+
+}

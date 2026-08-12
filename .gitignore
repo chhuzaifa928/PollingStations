@@ -1,0 +1,26 @@
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build results
+bin/
+obj/
+*.binlog
+
+## NuGet
+packages/
+
+## EF / temp
+*.tmp
+*.log
+
+## OS
+Thumbs.db
+Desktop.ini
+
+## Runtime
+*.dll
+*.pdb

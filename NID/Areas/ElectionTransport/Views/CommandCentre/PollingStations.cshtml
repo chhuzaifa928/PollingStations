@@ -1,0 +1,12 @@
+@model NID.Areas.ElectionTransport.Models.TransportPageViewModel
+@{ ViewBag.Title = "Polling Station Transport"; }
+@Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportAssets.cshtml")
+<div class="et-page">
+    @Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportNav.cshtml", Model)
+    <div class="et-shell et-toolbar"><div class="et-field"><label>Polling-station service monitoring</label><div class="et-sub">Assigned vehicles, live availability, validated trips, transport requests and voter-load service gaps.</div></div><button id="et-refresh-stations" class="et-btn navy" type="button">Refresh</button><span id="et-station-count" class="et-badge blue">0 stations</span></div>
+    <div class="et-shell et-card"><div class="et-card-body"><div class="et-card-head"><div><h2>Constituency polling-station transport matrix</h2><div class="et-sub">Stations without active vehicles or with low operational coverage require intervention first.</div></div></div><div class="et-table-wrap"><table class="et-table"><thead><tr><th>Polling station</th><th class="right">Voters</th><th class="right">Promised</th><th class="right">Assigned</th><th class="right">Online</th><th class="right">Trips</th><th class="right">Distance</th><th class="right">Open requests</th><th>Status</th><th></th></tr></thead><tbody id="et-stations-body"><tr><td colspan="10" class="et-empty">Loading polling stations…</td></tr></tbody></table></div></div></div>
+</div>
+@section scripts {
+<script src="@Url.Content("~/Scripts/ElectionTransport/transport.core.js")"></script><script src="@Url.Content("~/Scripts/ElectionTransport/transport.lists.js")"></script>
+<script>ElectionTransport.Lists.stations({ contextId:@Model.ElectionContextId, url:'@Url.Action("PollingStations","TransportApi",new { area="ElectionTransport" })', detailsUrl:'@Url.Action("PollingStation","CommandCentre",new { area="ElectionTransport",id="__id__" })' });</script>
+}

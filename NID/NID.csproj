@@ -1,0 +1,613 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{05AE1FC2-CC3F-4C53-A054-5BB56154C569}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NID</RootNamespace>
+    <AssemblyName>NID</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <Use64BitIISExpress />
+    <IISExpressSSLPort>44370</IISExpressSSLPort>
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.2.1.66\lib\net461\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.TelemetryCorrelation, Version=1.0.8.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.TelemetryCorrelation.1.0.8\lib\net45\Microsoft.AspNet.TelemetryCorrelation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=9.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.9.0.1\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.6.0\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+    </Reference>
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.7\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Optimization">
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.7\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="WebGrease">
+      <Private>True</Private>
+      <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
+    </Reference>
+    <Reference Include="Antlr3.Runtime">
+      <Private>True</Private>
+      <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Areas\ElectionTransport\Controllers\CommandCentreController.cs" />
+    <Compile Include="Areas\ElectionTransport\Controllers\PublicTransportController.cs" />
+    <Compile Include="Areas\ElectionTransport\Controllers\TransportApiController.cs" />
+    <Compile Include="Areas\ElectionTransport\Controllers\TransportIntegrationController.cs" />
+    <Compile Include="Areas\ElectionTransport\ElectionTransportAreaRegistration.cs" />
+    <Compile Include="Areas\ElectionTransport\Infrastructure\SqlReaderExtensions.cs" />
+    <Compile Include="Areas\ElectionTransport\Infrastructure\TransportConnectionFactory.cs" />
+    <Compile Include="Areas\ElectionTransport\Infrastructure\TransportModuleOptions.cs" />
+    <Compile Include="Areas\ElectionTransport\Infrastructure\TransportSecurity.cs" />
+    <Compile Include="Areas\ElectionTransport\Models\TransportDtos.cs" />
+    <Compile Include="Areas\ElectionTransport\Models\TransportFormModels.cs" />
+    <Compile Include="Areas\ElectionTransport\Services\DummyTransportSimulator.cs" />
+    <Compile Include="Areas\ElectionTransport\Services\ITransportService.cs" />
+    <Compile Include="Areas\ElectionTransport\Services\SqlTransportService.Common.cs" />
+    <Compile Include="Areas\ElectionTransport\Services\SqlTransportService.Details.cs" />
+    <Compile Include="Areas\ElectionTransport\Services\SqlTransportService.Forms.cs" />
+    <Compile Include="Areas\ElectionTransport\Services\SqlTransportService.Queries.cs" />
+    <Compile Include="Areas\ElectionTransport\Services\SqlTransportService.Requests.cs" />
+    <Compile Include="Controllers\CrudController.cs" />
+    <Compile Include="Controllers\DashboardController.cs" />
+    <Compile Include="Controllers\LookupController.cs" />
+    <Compile Include="Controllers\MetadataController.cs" />
+    <Compile Include="Controllers\SuperController.cs" />
+    <Compile Include="Controllers\GenericController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DashboardViewModel.cs" />
+    <Compile Include="Models\DriverModel.cs" />
+    <Compile Include="Models\ElectionModel.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ElectionModel.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ElectionModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ElectionModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ElectionModel.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ElectionModel.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\field_metadata.cs">
+      <DependentUpon>ElectionModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\GenericDeleteRequest.cs" />
+    <Compile Include="Models\GenericRow.cs" />
+    <Compile Include="Models\GenericSaveRequest.cs" />
+    <Compile Include="Models\get_candidate_votes_Result.cs">
+      <DependentUpon>ElectionModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\get_constituency_Result.cs">
+      <DependentUpon>ElectionModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\get_polling_scheme_Result.cs">
+      <DependentUpon>ElectionModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\get_polling_stations_Result.cs">
+      <DependentUpon>ElectionModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\get_voters_Result.cs">
+      <DependentUpon>ElectionModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\IncidentModel.cs" />
+    <Compile Include="Models\PollingStationModel.cs" />
+    <Compile Include="Models\RouteModel.cs" />
+    <Compile Include="Models\VehicleModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\bootstrap-theme.css" />
+    <Content Include="Content\bootstrap-theme.min.css" />
+    <Content Include="Content\bootstrap.css" />
+    <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\css\all.min.css" />
+    <Content Include="Content\css\bootstrap.min.css" />
+    <Content Include="Content\css\buttons.dataTables.min.css" />
+    <Content Include="Content\css\Control.FullScreen.css" />
+    <Content Include="Content\css\flag-icons.min.css" />
+    <Content Include="Content\css\font-awesome.min.css" />
+    <Content Include="Content\css\jquery.dataTables.min.css" />
+    <Content Include="Content\css\leaflet.css" />
+    <Content Include="Content\ElectionTransport\election-transport.css" />
+    <Content Include="Content\flag\05-arrow-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\07-Axe-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\09-Bat-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\101-Peacock-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\107-Plough-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\114-Ricksha-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\12-bicycle-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\120-Saw-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\121-Scale-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\127-Ship-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\128-Sickle-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\130-Spade-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\136-Star-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\137-A-Sun-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\141-Table-Lamp-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\142-Takhti-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\146-Tent-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\147-Tiger-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\15-Boat-Pakistan-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\150-Torch-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\152-Tractor-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\153-Tree-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\154-Trophy-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\157-Tumbler-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\158-Turban-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\161-Umbrella-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\166-Wheat-Bunch-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\167-Wheel-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\18-Book-JamiatI-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\24-Bulb-Election-Pakistan-FAFEN.png" />
+    <Content Include="Content\flag\28-A-Cannon-Election-Pakistan-FAFEN.png" />
+    <Content Include="Content\flag\28-Camel-Election-Pakistan-FAFEN.png" />
+    <Content Include="Content\flag\30-Car-Election-Pakistan-FAFEN.png" />
+    <Content Include="Content\flag\31-Candle-Pakistan-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\33-Chiragh-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\34-Chair-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\37-Coat-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\42-Cow-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\44-Crescent-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\45-a-Iron-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\45-Crown-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\52-Eagle-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\53-Elephant-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\54-Electric-Pole-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\57-Fist-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\58-Fish-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\59-Foot-Ball-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\60-Fountain-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\74-Helicopter-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\75-Horse-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\76-Hocky-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\78-A-Hooka-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\78-C-Human-Hand-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\79-Inkpot-with-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\83-Key-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\84-B-Kite-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\86-Ladder-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\87-Lantern-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\93-D-Minar-e-Pakistan-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\94-Missile-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\98-Olympic-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Aam-Awam-Party.png" />
+    <Content Include="Content\flag\Aam-Log-Party-Pakistan.png" />
+    <Content Include="Content\flag\Aeroplane-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\All-Pakistan-Minority-Movement.png" />
+    <Content Include="Content\flag\All-Pakistan-Muslim-League---Jinnah.png" />
+    <Content Include="Content\flag\All-Pakistan-Tehreek.png" />
+    <Content Include="Content\flag\AMLP.png" />
+    <Content Include="Content\flag\Amun-Taraqqi-Party.png" />
+    <Content Include="Content\flag\ANP.png" />
+    <Content Include="Content\flag\APML.png" />
+    <Content Include="Content\flag\Awam-League.png" />
+    <Content Include="Content\flag\Awami-Justice-Party-Pakistan.png" />
+    <Content Include="Content\flag\Awami-Party-Pakistan-S.png" />
+    <Content Include="Content\flag\Awami-Workers-Party.png" />
+    <Content Include="Content\flag\Balloons-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Balochistan-Awami-Party.png" />
+    <Content Include="Content\flag\Batsman-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\BNP-A.png" />
+    <Content Include="Content\flag\BNP.png" />
+    <Content Include="Content\flag\Comb-Election-Pakistan-FAFEN.png" />
+    <Content Include="Content\flag\Combat-Aircraft-ELection-Symbols.png" />
+    <Content Include="Content\flag\Crane-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Date-Palm-Tree-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Deer-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Diamond-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Dolphin-Election-Pakistan-FAFEN.png" />
+    <Content Include="Content\flag\flagmissing.png" />
+    <Content Include="Content\flag\Front-National-Pakistan.png" />
+    <Content Include="Content\flag\Gate-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Gavel-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Giraffe-Election-Symbols.png" />
+    <Content Include="Content\flag\Grand-Democractic-Alliance.png" />
+    <Content Include="Content\flag\Hazara-Democratic-Party.png" />
+    <Content Include="Content\flag\Humdardan-e-Watan-Pakistan.png" />
+    <Content Include="Content\flag\HUt-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\IconPdf.png" />
+    <Content Include="Content\flag\independent.png" />
+    <Content Include="Content\flag\IND.png" />
+    <Content Include="Content\flag\Jamiat-Ulma-e-Pakistan-%28Noorani%29.png" />
+    <Content Include="Content\flag\Jamote-Qami-Movement.png" />
+    <Content Include="Content\flag\Jannat-Pakistan-Party.png" />
+    <Content Include="Content\flag\Jharoo-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\JIP.png" />
+    <Content Include="Content\flag\JI.png" />
+    <Content Include="Content\flag\JUI-F.png" />
+    <Content Include="Content\flag\JUIF.png" />
+    <Content Include="Content\flag\JWP.png" />
+    <Content Include="Content\flag\MMA.png" />
+    <Content Include="Content\flag\Mohajar-Qaumi-Movement-Pakistan.png" />
+    <Content Include="Content\flag\Move-on-Pakistan.png" />
+    <Content Include="Content\flag\MQMP.png" />
+    <Content Include="Content\flag\MQM.png" />
+    <Content Include="Content\flag\Mustaqbil-Pakistan.png" />
+    <Content Include="Content\flag\Mutahidda-Qabil-Party.png" />
+    <Content Include="Content\flag\MWM.png" />
+    <Content Include="Content\flag\National-Peace-Council-Party.png" />
+    <Content Include="Content\flag\NP.png" />
+    <Content Include="Content\flag\Ostrich-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Pak-Sarzameen-Party.png" />
+    <Content Include="Content\flag\Pakistan Kissan Ittehad-CA.png" />
+    <Content Include="Content\flag\Pakistan-Aman-Tehreek.png" />
+    <Content Include="Content\flag\Pakistan-Awami-Inqelabi-League.png" />
+    <Content Include="Content\flag\Pakistan-Awami-League.png" />
+    <Content Include="Content\flag\Pakistan-Awami-Raj.png" />
+    <Content Include="Content\flag\Pakistan-Brabary-Party.png" />
+    <Content Include="Content\flag\Pakistan-Conservative-Party.png" />
+    <Content Include="Content\flag\Pakistan-Falah-Party.png" />
+    <Content Include="Content\flag\Pakistan-Freedom-Moment.png" />
+    <Content Include="Content\flag\Pakistan-Human-Rights-Party.png" />
+    <Content Include="Content\flag\Pakistan-Humans-Party.png" />
+    <Content Include="Content\flag\Pakistan-Islamic-Republican-Party.png" />
+    <Content Include="Content\flag\Pakistan-Justice-&amp;-Democratic-Party.png" />
+    <Content Include="Content\flag\Pakistan-Muslim-Alliance.png" />
+    <Content Include="Content\flag\Pakistan-Muslim-League-Organization.png" />
+    <Content Include="Content\flag\Pakistan-Quami-Yakjehti-Party.png" />
+    <Content Include="Content\flag\Pakistan-Rah-e-Haq-Party.png" />
+    <Content Include="Content\flag\Pakistan-Siriaki-Party-T.png" />
+    <Content Include="Content\flag\Pakistan-Sunni-Tehreek.png" />
+    <Content Include="Content\flag\Pakistan-Tehreek-e-Insaf-Gulalai.png" />
+    <Content Include="Content\flag\.png" />
+    <Content Include="Content\flag\PTI-Independent.png" />
+    <Content Include="Content\flag\PTI-N.png" />
+    <Content Include="Content\flag\Pakistan-Welfare-Party.png" />
+    <Content Include="Content\flag\PakistanTehreek-e-insaniat.png" />
+    <Content Include="Content\flag\Pasban.png" />
+    <Content Include="Content\flag\Peoples-Movement-of-Pakistan.png" />
+    <Content Include="Content\flag\PMAP.png" />
+    <Content Include="Content\flag\PML-N.png" />
+    <Content Include="Content\flag\PML-SB.png" />
+    <Content Include="Content\flag\PML.png" />
+    <Content Include="Content\flag\PNML.png" />
+    <Content Include="Content\flag\PPP-S.png" />
+    <Content Include="Content\flag\PPP.png" />
+    <Content Include="Content\flag\PPPP.png" />
+    <Content Include="Content\flag\PTI-P.png" />
+    <Content Include="Content\flag\PTI.png" />
+    <Content Include="Content\flag\QWP.png" />
+    <Content Include="Content\flag\Racket-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Rope-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Roshan-Pakistan-League.png" />
+    <Content Include="Content\flag\Saraikistan-Democratic-Party.png" />
+    <Content Include="Content\flag\Scissiors-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Sindh-United-Party.png" />
+    <Content Include="Content\flag\Stag-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Sunni-Ittehad-Council.png" />
+    <Content Include="Content\flag\Swallow-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\symbolmissing.png" />
+    <Content Include="Content\flag\Tabdeeli-Pasand-Party.png" />
+    <Content Include="Content\flag\Tehreek-e-Labaik-Islam.png" />
+    <Content Include="Content\flag\TLP.png" />
+    <Content Include="Content\flag\Tehreek-e-Suba-Hazara.png" />
+    <Content Include="Content\flag\Tehreek-Jawanan-Pakistan.png" />
+    <Content Include="Content\flag\Tehreek-Tabdili-Nizam-Pakistan.png" />
+    <Content Include="Content\flag\Tortoise-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Tyre-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\flag\Unity-Election-Symbol-Pakistan.png" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\img\3leaders.jpg" />
+    <Content Include="Content\img\abroad_banner1.jpg" />
+    <Content Include="Content\img\abroad_banner2.jpg" />
+    <Content Include="Content\img\banner.jpg" />
+    <Content Include="Content\img\bannerecp.jpg" />
+    <Content Include="Content\img\ecp.jpg" />
+    <Content Include="Content\img\icons\marker-icon-blue.png" />
+    <Content Include="Content\img\icons\marker-icon-green.png" />
+    <Content Include="Content\img\icons\marker-icon-red.png" />
+    <Content Include="Content\img\icons\marker-shadow.png" />
+    <Content Include="Content\img\pak.png" />
+    <Content Include="Content\img\econ.jpg" />
+    <Content Include="Content\img\votbox.jpg" />
+    <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
+    <Content Include="Content\Site.css" />
+    <Content Include="Models\ElectionModel.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ElectionModel.edmx</DependentUpon>
+      <LastGenOutput>ElectionModel.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\ElectionModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ElectionModel.edmx</DependentUpon>
+      <LastGenOutput>ElectionModel.cs</LastGenOutput>
+    </Content>
+    <Content Include="Scripts\ElectionTransport\transport.analytics.js" />
+    <Content Include="Scripts\ElectionTransport\transport.core.js" />
+    <Content Include="Scripts\ElectionTransport\transport.dashboard.js" />
+    <Content Include="Scripts\ElectionTransport\transport.details.js" />
+    <Content Include="Scripts\ElectionTransport\transport.exceptions.js" />
+    <Content Include="Scripts\ElectionTransport\transport.lists.js" />
+    <Content Include="Scripts\ElectionTransport\transport.live-map.js" />
+    <Content Include="Scripts\ElectionTransport\transport.public-request.js" />
+    <Content Include="Scripts\ElectionTransport\transport.requests.js" />
+    <Content Include="script\bootstrap.min.js" />
+    <Content Include="script\data\field_metadata.js" />
+    <Content Include="script\data\predict.js" />
+    <Content Include="script\data\psx.js" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Analytics.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Exceptions.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Index.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\LiveMap.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\ManageProvider.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\ManageVehicle.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\PollingStation.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\PollingStations.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Provider.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Providers.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Requests.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Trips.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Vehicle.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\CommandCentre\Vehicles.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\PublicTransport\Confirmation.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\PublicTransport\Request.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\PublicTransport\Track.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\Shared\_TransportAssets.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\Shared\_TransportMessages.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\Shared\_TransportNav.cshtml" />
+    <Content Include="Areas\ElectionTransport\Views\web.config" />
+    <Content Include="Areas\ElectionTransport\Views\_ViewStart.cshtml" />
+    <None Include="script\geojson\ds.geojson" />
+    <None Include="script\geojson\dv.geojson" />
+    <Content Include="script\geojson\N76.json" />
+    <None Include="script\geojson\na.geojson" />
+    <None Include="script\geojson\pa.geojson" />
+    <None Include="script\geojson\pv.geojson" />
+    <None Include="script\geojson\th.geojson" />
+    <Content Include="script\jquery-3.4.1.min.js" />
+    <Content Include="script\js\bootstrap.min.js" />
+    <Content Include="script\js\buttons.html5.min.js" />
+    <Content Include="script\js\buttons.print.min.js" />
+    <Content Include="script\js\Control.FullScreen.js" />
+    <Content Include="script\js\data.js" />
+    <Content Include="script\js\dataTables.buttons.min.js" />
+    <Content Include="script\js\drilldown.js" />
+    <Content Include="script\js\embed.js" />
+    <Content Include="script\js\exporting.js" />
+    <Content Include="script\js\highmaps.js" />
+    <Content Include="script\js\jquery-3.7.1.min.js" />
+    <Content Include="script\js\jquery.dataTables.min.js" />
+    <Content Include="script\js\jstat.min.js" />
+    <Content Include="script\js\jszip.min.js" />
+    <Content Include="script\js\leaflet.js" />
+    <Content Include="script\js\offline-exporting.js" />
+    <Content Include="script\js\pdfmake.min.js" />
+    <Content Include="script\js\tfjslatest.js" />
+    <Content Include="script\js\vfs_fonts.js" />
+    <Content Include="script\site\mymap.js" />
+    <Content Include="script\site\newprovince.js" />
+    <Content Include="script\site\race.js" />
+    <Content Include="script\site\psx.js" />
+    <Content Include="script\site\worldmap.js" />
+    <Content Include="Web.config" />
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Views\Web.config" />
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Home\Notable.cshtml" />
+    <Content Include="Views\Home\Forms.cshtml" />
+    <Content Include="Views\Home\Station.cshtml" />
+    <Content Include="script\geojson\vil_narowal.geojson" />
+    <Content Include="Views\Home\Villages.cshtml" />
+    <Content Include="script\js\json\world.topo.json" />
+    <Content Include="Views\Generic\Index.cshtml" />
+    <Content Include="Views\Crud\Table.cshtml" />
+    <Content Include="Views\Super\Create.cshtml" />
+    <Content Include="Views\Super\Index.cshtml" />
+    <Content Include="Views\Super\Alter.cshtml" />
+    <Content Include="Views\Home\Dashboard.cshtml" />
+    <Content Include="Views\Dashboard\Index.cshtml" />
+    <Content Include="Views\Home\Polling.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+    <Folder Include="Views\Lookup\" />
+    <Folder Include="Views\Metadata\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\bootstrap.min.css.map" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Content\bootstrap-theme.min.css.map" />
+    <Content Include="Content\bootstrap-theme.css.map" />
+    <EntityDeploy Include="Models\ElectionModel.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>ElectionModel.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\ElectionModel.edmx.diagram">
+      <DependentUpon>ElectionModel.edmx</DependentUpon>
+    </Content>
+    <None Include="packages.config" />
+    <Content Include="script\polygons\districts.json" />
+    <Content Include="script\polygons\divisions.json" />
+    <Content Include="script\polygons\provinces.json" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Shared\_EconomicUnits.cshtml" />
+    <Content Include="Views\Home\Result.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>62526</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>https://localhost:44370/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+</Project>

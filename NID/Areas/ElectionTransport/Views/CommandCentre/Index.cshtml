@@ -1,0 +1,962 @@
+@model NID.Areas.ElectionTransport.Models.TransportPageViewModel
+@{
+    ViewBag.Title = "Election Transport Command Centre";
+}
+
+@Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportAssets.cshtml")
+
+<style>
+    /* ============================================================
+       DASHBOARD-ONLY VISUAL UPGRADES
+       No core CSS or shared component changes are required.
+       ============================================================ */
+
+    .et-dashboard-map-wrap {
+        position: relative;
+    }
+
+    .et-map-focus-bar {
+        display: none;
+        position: absolute;
+        z-index: 650;
+        left: 14px;
+        right: 14px;
+        top: 14px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        background: rgba(255,255,255,.96);
+        border: 1px solid #d7e3df;
+        border-radius: 10px;
+        box-shadow: 0 7px 20px rgba(16,42,67,.12);
+        backdrop-filter: blur(5px);
+    }
+
+    .et-map-focus-bar.open {
+        display: flex;
+    }
+
+    .et-map-focus-copy {
+        min-width: 0;
+    }
+
+    .et-map-focus-copy strong {
+        display: block;
+        color: #1f3448;
+        font-size: 12.5px;
+        line-height: 1.25;
+    }
+
+    .et-map-focus-copy span {
+        display: block;
+        margin-top: 2px;
+        color: #6f7f7a;
+        font-size: 10.5px;
+    }
+
+    .et-map-reset-focus {
+        flex: 0 0 auto;
+        border: 1px solid #d6e1de;
+        border-radius: 7px;
+        background: #fff;
+        color: #344a44;
+        padding: 6px 9px;
+        font-size: 10.5px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .et-map-reset-focus:hover {
+        background: #f3f7f5;
+    }
+
+    .et-dashboard-map-note {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-top: 9px;
+        color: #66756f;
+        font-size: 10.5px;
+    }
+
+    .et-dashboard-map-note .station-key {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 700;
+    }
+
+    .et-dashboard-map-note .station-dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+    }
+
+    .et-dashboard-map-note .station-dot.black {
+        background: #111827;
+    }
+
+    .et-dashboard-map-note .station-dot.red {
+        background: #d92d20;
+    }
+
+    /* Leaflet station popup */
+    .et-station-popup-title {
+        margin: 0;
+        color: #172b3d;
+        font-size: 14px;
+        font-weight: 900;
+        line-height: 1.3;
+    }
+
+    .et-station-popup-name {
+        margin-top: 3px;
+        color: #66756f;
+        font-size: 11px;
+        line-height: 1.35;
+    }
+
+    .et-station-popup-alert {
+        margin-top: 8px;
+        padding: 7px 8px;
+        color: #b42318;
+        background: #fff3f2;
+        border: 1px solid #fecdca;
+        border-radius: 7px;
+        font-size: 10.5px;
+        font-weight: 800;
+    }
+
+    .et-station-popup-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .et-station-popup-actions button,
+    .et-station-popup-actions a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 29px;
+        padding: 5px 9px;
+        border-radius: 7px;
+        font-size: 10px;
+        font-weight: 800;
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+
+    .et-station-popup-actions .focus {
+        border: 1px solid #0f6d58;
+        color: #fff;
+        background: #0f6d58;
+    }
+
+    .et-station-popup-actions .record {
+        border: 1px solid #d6e1de;
+        color: #344a44;
+        background: #fff;
+    }
+
+    /* Provider accountability becomes visibly clickable */
+    .et-provider-account-row {
+        display: grid;
+        grid-template-columns: 34px minmax(0,1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 6px;
+        margin: 0 -6px;
+        border-bottom: 1px solid #e9efed;
+        border-radius: 8px;
+        color: inherit !important;
+        text-decoration: none !important;
+        transition: background .15s ease, transform .15s ease;
+    }
+
+    .et-provider-account-row:hover {
+        background: #f2f8f5;
+        transform: translateX(2px);
+    }
+
+    .et-provider-rank {
+        display: flex;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #eaf4f0;
+        color: #0f6d58;
+        font-size: 11px;
+        font-weight: 900;
+    }
+
+    .et-provider-copy {
+        min-width: 0;
+    }
+
+    .et-provider-name {
+        overflow: hidden;
+        color: #20384d;
+        font-size: 12px;
+        font-weight: 900;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .et-provider-meta {
+        margin-top: 3px;
+        color: #71807b;
+        font-size: 10.2px;
+        line-height: 1.35;
+    }
+
+    .et-provider-score {
+        min-width: 52px;
+        padding: 6px 7px;
+        border-radius: 8px;
+        background: #f0f5ff;
+        color: #1849a9;
+        font-size: 12px;
+        font-weight: 900;
+        text-align: center;
+    }
+
+    /* ============================================================
+       LOWER OPERATIONAL SECTION
+       ============================================================ */
+
+    .et-dashboard-lower .et-card {
+        overflow: hidden;
+    }
+
+    .et-dashboard-lower .et-card-head {
+        margin-bottom: 13px;
+    }
+
+    .et-dashboard-lower .et-card-head h2 {
+        color: #20374c;
+        font-size: 17px;
+        line-height: 1.25;
+    }
+
+    .et-dashboard-lower .et-card-head .et-sub {
+        margin-top: 4px;
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .et-dashboard-lower .et-table-wrap {
+        border-radius: 10px;
+    }
+
+    .et-dashboard-lower .et-table {
+        font-size: 12px;
+    }
+
+    .et-dashboard-lower .et-table th {
+        padding: 11px 10px;
+        font-size: 9.5px;
+    }
+
+    .et-dashboard-lower .et-table td {
+        padding: 11px 10px;
+        font-size: 11.5px;
+    }
+
+    /* Station gap table */
+    .et-station-gap-row td:first-child {
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .et-station-gap-row td:first-child:before {
+        content: "";
+        position: absolute;
+        top: 7px;
+        bottom: 7px;
+        left: 0;
+        width: 3px;
+        border-radius: 4px;
+        background: #667085;
+    }
+
+    .et-station-gap-row.et-no-vehicle td {
+        background: #fff9f8 !important;
+    }
+
+    .et-station-gap-row.et-no-vehicle td:first-child:before {
+        background: #d92d20;
+    }
+
+    .et-station-identity {
+        display: flex;
+        gap: 9px;
+        align-items: flex-start;
+        min-width: 0;
+    }
+
+    .et-station-ref {
+        flex: 0 0 auto;
+        display: inline-flex;
+        min-width: 39px;
+        min-height: 28px;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 6px;
+        color: #fff;
+        background: #111827;
+        border-radius: 7px;
+        font-size: 10px;
+        font-weight: 900;
+    }
+
+    .et-no-vehicle .et-station-ref {
+        background: #d92d20;
+    }
+
+    .et-station-copy {
+        min-width: 0;
+    }
+
+    .et-station-copy strong {
+        display: block;
+        color: #20384d;
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    .et-station-copy span {
+        display: block;
+        margin-top: 3px;
+        color: #7a8782;
+        font-size: 10px;
+    }
+
+    .et-metric-strong {
+        color: #22394d;
+        font-size: 15px;
+        font-weight: 900;
+    }
+
+    .et-fleet-cell {
+        min-width: 115px;
+    }
+
+    .et-fleet-numbers {
+        display: flex;
+        justify-content: flex-end;
+        align-items: baseline;
+        gap: 3px;
+    }
+
+    .et-fleet-numbers strong {
+        color: #0f6d58;
+        font-size: 16px;
+        font-weight: 900;
+    }
+
+    .et-fleet-numbers span {
+        color: #7a8782;
+        font-size: 10px;
+    }
+
+    .et-no-vehicle .et-fleet-numbers strong {
+        color: #d92d20;
+    }
+
+    .et-mini-progress {
+        height: 5px;
+        margin-top: 5px;
+        overflow: hidden;
+        border-radius: 5px;
+        background: #e9efed;
+    }
+
+    .et-mini-progress > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: #0f6d58;
+    }
+
+    .et-no-vehicle .et-mini-progress > span {
+        background: #d92d20;
+    }
+
+    .et-station-map-action {
+        border: 1px solid #cfded9;
+        border-radius: 7px;
+        background: #fff;
+        color: #24473f;
+        padding: 5px 8px;
+        font-size: 10px;
+        font-weight: 800;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .et-station-map-action:hover {
+        border-color: #0f6d58;
+        background: #eef8f4;
+    }
+
+    /* Exception cards */
+    .et-exception-card {
+        display: grid;
+        grid-template-columns: 34px minmax(0,1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        background: #fff;
+        border: 1px solid #e1e9e6;
+        border-left: 3px solid #d92d20;
+        border-radius: 9px;
+    }
+
+    .et-exception-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .et-exception-symbol {
+        display: flex;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        color: #b42318;
+        background: #fff1f0;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 900;
+    }
+
+    .et-exception-copy {
+        min-width: 0;
+    }
+
+    .et-exception-copy strong {
+        display: block;
+        color: #263d51;
+        font-size: 11.5px;
+    }
+
+    .et-exception-copy span {
+        display: block;
+        margin-top: 3px;
+        color: #74817d;
+        font-size: 10px;
+        line-height: 1.4;
+    }
+
+    /* Request table */
+    .et-request-row.priority td {
+        background: #fffaf0 !important;
+    }
+
+    .et-request-identity strong {
+        display: block;
+        color: #20384d;
+        font-size: 12.5px;
+        font-weight: 900;
+    }
+
+    .et-request-identity span {
+        display: block;
+        margin-top: 3px;
+        color: #74817d;
+        font-size: 10px;
+    }
+
+    .et-request-pickup strong {
+        display: block;
+        color: #334b5f;
+        font-size: 11.5px;
+    }
+
+    .et-request-pickup span {
+        display: block;
+        margin-top: 3px;
+        color: #83908c;
+        font-size: 9.7px;
+    }
+
+    .et-passenger-pill {
+        display: inline-flex;
+        min-width: 32px;
+        justify-content: center;
+        padding: 5px 7px;
+        color: #1849a9;
+        background: #eff4ff;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .et-request-assistance {
+        display: block;
+        margin-top: 4px;
+        color: #7b6b22;
+        font-size: 9.5px;
+        font-weight: 700;
+    }
+
+    .et-wait-pill {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 3px;
+        min-width: 68px;
+        justify-content: flex-end;
+        padding: 5px 7px;
+        border-radius: 7px;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .et-wait-pill strong {
+        font-size: 13px;
+    }
+
+    .et-wait-pill span {
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+    .et-wait-pill.good {
+        color: #067647;
+        background: #ecfdf3;
+    }
+
+    .et-wait-pill.watch {
+        color: #b54708;
+        background: #fff6e8;
+    }
+
+    .et-wait-pill.urgent {
+        color: #b42318;
+        background: #fff1f0;
+    }
+
+    @@media (max-width: 900px) {
+        .et-map-focus-bar {
+            align-items: flex-start;
+        }
+
+        .et-provider-account-row {
+            grid-template-columns: 32px minmax(0,1fr);
+        }
+
+        .et-provider-score {
+            grid-column: 2;
+            justify-self: start;
+        }
+    }
+</style>
+
+<div class="et-page">
+
+    @Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportNav.cshtml", Model)
+    @Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportMessages.cshtml")
+    @Html.AntiForgeryToken()
+
+    <div class="et-shell et-toolbar">
+        <div class="et-field">
+            <label>Operational reference</label>
+            <div class="et-sub">100-metre polling-station geofences</div>
+        </div>
+
+        <div class="et-field small">
+            <label>Last refresh</label>
+            <div id="et-server-time" class="et-name">Connecting...</div>
+        </div>
+
+        <button id="et-refresh-dashboard" class="et-btn navy" type="button">
+            Refresh dashboard
+        </button>
+
+        @if (Model.AllowDemoAdministration && Model.SelectedContext.IsDemoMode)
+        {
+            <button id="et-seed-demo" class="et-btn light" type="button">
+                Prepare demo data
+            </button>
+
+            <button id="et-demo-toggle" class="et-btn green-light" type="button">
+                Start dummy traffic
+            </button>
+        }
+    </div>
+
+
+    <div id="et-dashboard-content" class="et-grid">
+
+        <article class="et-card et-kpi">
+            <div class="et-kpi-label">Vehicles promised</div>
+            <div id="et-kpi-promised" class="et-kpi-value">0</div>
+            <div class="et-kpi-foot">Provider commitments for the constituency</div>
+        </article>
+
+        <article class="et-card et-kpi blue">
+            <div class="et-kpi-label">Currently active</div>
+            <div id="et-kpi-active" class="et-kpi-value">0</div>
+            <div class="et-kpi-foot">Vehicles with a recent valid GPS feed</div>
+        </article>
+
+        <article class="et-card et-kpi purple">
+            <div class="et-kpi-label">Validated trips</div>
+            <div id="et-kpi-trips" class="et-kpi-value">0</div>
+            <div class="et-kpi-foot">Polling-station arrival trips passing geofence rules</div>
+        </article>
+
+        <article class="et-card et-kpi cyan">
+            <div class="et-kpi-label">Distance covered</div>
+            <div id="et-kpi-distance" class="et-kpi-value">0</div>
+            <div class="et-kpi-foot">Kilometres covered on validated trips</div>
+        </article>
+
+        <article class="et-card et-kpi red">
+            <div class="et-kpi-label">Missing / offline</div>
+            <div id="et-kpi-missing" class="et-kpi-value">0</div>
+            <div class="et-kpi-foot">Promised vehicles requiring immediate attention</div>
+        </article>
+
+        <article class="et-card et-kpi amber">
+            <div class="et-kpi-label">Polling stations served</div>
+            <div id="et-kpi-stations" class="et-kpi-value">0 / 0</div>
+            <div class="et-kpi-foot">Stations receiving at least one valid trip</div>
+        </article>
+
+        <article class="et-card et-kpi blue">
+            <div class="et-kpi-label">Open home requests</div>
+            <div id="et-kpi-requests" class="et-kpi-value">0</div>
+            <div class="et-kpi-foot">Elderly, accessibility and household pickup requests</div>
+        </article>
+
+        <article class="et-card et-kpi">
+            <div class="et-kpi-label">Confirmed passengers</div>
+            <div id="et-kpi-passengers" class="et-kpi-value">0</div>
+            <div class="et-kpi-foot">Passengers recorded on validated trips</div>
+        </article>
+
+
+        <!-- =========================================================
+             LIVE MAP
+             ========================================================= -->
+        <article class="et-card et-span-8">
+            <div class="et-card-body">
+
+                <div class="et-card-head">
+                    <div>
+                        <h2>Live constituency transport map</h2>
+                        <div class="et-sub">
+                            Polling stations without any assigned vehicle are red. Stations with vehicle support remain black.
+                            Double-click a station, or use View station vehicles in its popup, to focus its fleet.
+                        </div>
+                    </div>
+
+                    <a id="et-open-full-map"
+                       class="et-btn small light"
+                       href="@Url.RouteUrl("ElectionTransport_Default", new { action = "LiveMap", contextId = Model.ElectionContextId })">
+                        Open full map
+                    </a>
+                </div>
+
+                <div class="et-dashboard-map-wrap">
+
+                    <div id="et-map-focus-bar" class="et-map-focus-bar">
+                        <div class="et-map-focus-copy">
+                            <strong id="et-map-focus-title">Polling station</strong>
+                            <span id="et-map-focus-meta"></span>
+                        </div>
+
+                        <button id="et-map-reset-focus"
+                                class="et-map-reset-focus"
+                                type="button">
+                            Show all map
+                        </button>
+                    </div>
+
+                    <div id="et-dashboard-map" class="et-map"></div>
+
+                </div>
+
+                <div class="et-map-legend">
+                    <span class="et-legend-item"><span class="et-legend-dot" style="background:#079455"></span>Moving</span>
+                    <span class="et-legend-item"><span class="et-legend-dot" style="background:#155eef"></span>Approaching</span>
+                    <span class="et-legend-item"><span class="et-legend-dot" style="background:#6941c6"></span>At polling station</span>
+                    <span class="et-legend-item"><span class="et-legend-dot" style="background:#dc6803"></span>Idle</span>
+                    <span class="et-legend-item"><span class="et-legend-dot" style="background:#d92d20"></span>Offline</span>
+                </div>
+
+                <div class="et-dashboard-map-note">
+                    <span class="station-key">
+                        <span class="station-dot black"></span>
+                        Polling station with assigned vehicle
+                    </span>
+
+                    <span class="station-key">
+                        <span class="station-dot red"></span>
+                        Polling station with no assigned vehicle
+                    </span>
+                </div>
+
+            </div>
+        </article>
+
+
+        <!-- =========================================================
+             PROVIDERS
+             ========================================================= -->
+        <article class="et-card et-span-4">
+            <div class="et-card-body">
+
+                <div class="et-card-head">
+                    <div>
+                        <h2>Provider accountability</h2>
+                        <div class="et-sub">
+                            Provider names are clickable and open the complete provider record.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="et-stat-row"
+                     style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+
+                    <div class="et-stat">
+                        <span>Promise fulfilment</span>
+                        <strong id="et-fulfilment">0%</strong>
+
+                        <div class="et-progress" style="margin-top:7px">
+                            <div id="et-fulfilment-bar"
+                                 class="et-progress-bar"
+                                 style="width:0"></div>
+                        </div>
+                    </div>
+
+                    <div class="et-stat">
+                        <span>Station coverage</span>
+                        <strong id="et-coverage">0%</strong>
+
+                        <div class="et-progress" style="margin-top:7px">
+                            <div id="et-coverage-bar"
+                                 class="et-progress-bar"
+                                 style="width:0"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="et-provider-list" class="et-side-list">
+                    <div class="et-empty">Loading providers...</div>
+                </div>
+
+            </div>
+        </article>
+
+
+        <article class="et-card et-span-8">
+            <div class="et-card-body">
+                <div class="et-card-head">
+                    <div>
+                        <h2>Election-day activity by time</h2>
+                        <div class="et-sub">
+                            Active vehicles, valid trips and transport requests in 15-minute intervals.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="et-chart">
+                    <canvas id="et-timeline-chart"></canvas>
+                </div>
+            </div>
+        </article>
+
+
+        <article class="et-card et-span-4">
+            <div class="et-card-body">
+                <div class="et-card-head">
+                    <div>
+                        <h2>Vehicle fleet composition</h2>
+                        <div class="et-sub">
+                            Cars, rickshaws, jeeps, vans, coasters and buses.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="et-chart">
+                    <canvas id="et-type-chart"></canvas>
+                </div>
+            </div>
+        </article>
+
+
+        <!-- =========================================================
+             LOWER OPERATIONAL SECTION
+             ========================================================= -->
+        <div class="et-span-12 et-grid et-dashboard-lower">
+
+            <article class="et-card et-span-7">
+                <div class="et-card-body">
+
+                    <div class="et-card-head">
+                        <div>
+                            <h2>Polling-station service gaps</h2>
+                            <div class="et-sub">
+                                Stations with no assigned vehicle are visually marked as critical.
+                                Use View map to fly directly to the station and its assigned fleet.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="et-table-wrap">
+                        <table class="et-table">
+                            <thead>
+                                <tr>
+                                    <th>Polling station</th>
+                                    <th class="right">Voters</th>
+                                    <th class="right">Online / assigned</th>
+                                    <th class="right">Trips</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="et-station-gap-body">
+                                <tr>
+                                    <td colspan="6" class="et-empty">
+                                        Loading stations...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </article>
+
+
+            <article class="et-card et-span-5">
+                <div class="et-card-body">
+
+                    <div class="et-card-head">
+                        <div>
+                            <h2>Operational exceptions</h2>
+                            <div class="et-sub">
+                                Never activated, offline and visible-without-trip vehicles requiring attention.
+                            </div>
+                        </div>
+
+                        <a class="et-btn small light"
+                           href="@Url.Action("Exceptions", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">
+                            Review all
+                        </a>
+                    </div>
+
+                    <div id="et-exception-list" class="et-side-list">
+                        <div class="et-empty">Loading exceptions...</div>
+                    </div>
+
+                </div>
+            </article>
+
+
+            <article class="et-card et-span-12">
+                <div class="et-card-body">
+
+                    <div class="et-card-head">
+                        <div>
+                            <h2>Open home and accessibility transport requests</h2>
+                            <div class="et-sub">
+                                Priority, accessibility needs and waiting time are made more prominent for dispatch decisions.
+                            </div>
+                        </div>
+
+                        <a class="et-btn small primary"
+                           href="@Url.Action("Requests", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">
+                            Open dispatch queue
+                        </a>
+                    </div>
+
+                    <div class="et-table-wrap">
+                        <table class="et-table">
+                            <thead>
+                                <tr>
+                                    <th>Request</th>
+                                    <th>Pickup</th>
+                                    <th class="right">Passengers</th>
+                                    <th>Status</th>
+                                    <th class="right">Waiting</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="et-request-body">
+                                <tr>
+                                    <td colspan="5" class="et-empty">
+                                        Loading requests...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </article>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section scripts {
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <script src="@Url.Content("~/Scripts/ElectionTransport/transport.core.js")"></script>
+    <script src="@Url.Content("~/Scripts/ElectionTransport/transport.dashboard.js")"></script>
+
+    <script>
+
+        ElectionTransport.Dashboard.init({
+
+            contextId:
+                @Model.ElectionContextId,
+
+            refreshSeconds:
+                @Model.RefreshSeconds,
+
+            demoTickSeconds:
+                @Model.DemoTickSeconds,
+
+            geofenceRadius:
+                @Model.SelectedContext.GeofenceRadiusMeters,
+
+            dashboardUrl:
+                '@Url.Action("Dashboard", "TransportApi", new { area = "ElectionTransport" })',
+
+            simulationUrl:
+                '@Url.Action("SimulationTick", "TransportApi", new { area = "ElectionTransport" })',
+
+            seedUrl:
+                '@Url.Action("SeedDemo", "TransportApi", new { area = "ElectionTransport" })',
+
+            vehicleDetailsUrl:
+                '@Url.Action("Vehicle", "CommandCentre", new { area = "ElectionTransport", id = "__id__" })',
+
+            stationDetailsUrl:
+                '@Url.Action("PollingStation", "CommandCentre", new { area = "ElectionTransport", id = "__id__" })',
+
+            providerDetailsUrl:
+                '@Url.Action("Provider", "CommandCentre", new { area = "ElectionTransport", id = "__id__" })'
+
+        });
+
+    </script>
+}

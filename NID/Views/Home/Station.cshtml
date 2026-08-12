@@ -1,0 +1,62 @@
+﻿@{
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    Layout = "~/Views/Shared/_EconomicUnits.cshtml";
+    <style>
+
+        .c2 {
+            padding: 5px;
+        }
+    </style>
+}
+
+<h3>Polling Station Map</h3>
+<div id="map" style="height:500px;"></div>
+
+
+
+
+
+
+@section scripts{
+
+    <script src="~/script/js/leaflet.js"></script>
+    <script>
+        // Your JSON data
+        $.getJSON('/script/geojson/N76.json', function (data) {
+            displayMarkerMap(data);
+        });
+
+        function displayMarkerMap(data) {
+            const map = L.map('map').setView([32.102, 74.8765], 14);
+
+            // Add OpenStreetMap Tile Layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add Markers
+            data.forEach(entry => {
+                const lat = parseFloat(entry["Lat"]);
+                const lon = parseFloat(entry["Lon"]);
+                const popupContent = generatePopupTable(entry);
+
+                L.marker([lat, lon])
+                    .addTo(map)
+                    .bindPopup(popupContent);
+            });
+
+        }
+        function generatePopupTable(entry) {
+            let html = '<table>';
+            for (let key in entry) {
+                if (key !== "Lat" && key !== "Lon") {
+                    html += `<tr><th>${key}</th><td>${entry[key]}</td></tr>`;
+                }
+            }
+            html += '</table>';
+            return html;
+        }
+    </script>
+
+
+}

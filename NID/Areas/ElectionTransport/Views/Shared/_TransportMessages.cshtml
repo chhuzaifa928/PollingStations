@@ -1,0 +1,8 @@
+@if (TempData["Transport.Success"] != null)
+{
+    <div class="et-alert success">@TempData["Transport.Success"]</div>
+}
+@if (TempData["Transport.Error"] != null)
+{
+    <div class="et-alert danger">@TempData["Transport.Error"]</div>
+}

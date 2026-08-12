@@ -1,0 +1,4459 @@
+﻿
+@{
+    ViewBag.Title = "Election Polling Station Command Centre";
+    Layout = "~/Views/Shared/_EconomicUnits.cshtml";
+
+    var controllerName =
+        ViewContext.RouteData.Values["controller"].ToString();
+
+    var pollingStationsUrl = Url.Action(
+        "GetPollingStations",
+        controllerName
+    );
+
+    var pollingSchemeUrl = Url.Action(
+        "GetPollingScheme",
+        controllerName
+    );
+}
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      crossorigin="" />
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+
+<style>
+    .page-title-header{
+        display:none;
+    }
+    :root {
+        --ems-primary: #123c69;
+        --ems-primary-dark: #0a2747;
+        --ems-secondary: #176b87;
+        --ems-accent: #18a999;
+        --ems-success: #138a58;
+        --ems-warning: #d88b16;
+        --ems-danger: #c43c4e;
+        --ems-purple: #7357a8;
+        --ems-text: #172133;
+        --ems-muted: #6f7c91;
+        --ems-border: #dfe5ee;
+        --ems-page: #f3f6fa;
+        --ems-card: #ffffff;
+        --ems-shadow: 0 14px 35px rgba(27, 44, 75, .10);
+        --ems-soft-shadow: 0 7px 22px rgba(27, 44, 75, .08);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        background: var(--ems-page);
+    }
+
+    .ems-page {
+        min-height: calc(100vh - 65px);
+        color: var(--ems-text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    .ems-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 22px;
+        padding: 26px 30px;
+        margin-bottom: 20px;
+        color: #fff;
+        background: radial-gradient(circle at 90% 10%, rgba(255,255,255,.18), transparent 25%), radial-gradient(circle at 75% 100%, rgba(24,169,153,.35), transparent 35%), linear-gradient(125deg, #092744 0%, #123c69 55%, #176b87 100%);
+        box-shadow: var(--ems-shadow);
+    }
+
+        .ems-hero::before {
+            content: "";
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            right: -80px;
+            top: -95px;
+            border-radius: 50%;
+            border: 35px solid rgba(255,255,255,.07);
+        }
+
+    .ems-hero-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .ems-hero-title {
+        margin: 0;
+        font-size: 28px;
+        line-height: 1.2;
+        font-weight: 800;
+        letter-spacing: -.4px;
+    }
+
+    .ems-hero-subtitle {
+        max-width: 760px;
+        margin: 8px 0 0;
+        color: rgba(255,255,255,.82);
+        font-size: 14px;
+        line-height: 1.65;
+    }
+
+    .ems-live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+        padding: 10px 14px;
+        border: 1px solid rgba(255,255,255,.18);
+        border-radius: 999px;
+        background: rgba(255,255,255,.10);
+        backdrop-filter: blur(8px);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+    .ems-live-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #51e6a8;
+        box-shadow: 0 0 0 6px rgba(81,230,168,.14);
+        animation: emsPulse 1.8s infinite;
+    }
+
+    @@keyframes emsPulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(.75);
+            opacity: .65;
+        }
+    }
+
+    .ems-filter-panel {
+        background: var(--ems-card);
+        border: 1px solid rgba(18,60,105,.07);
+        border-radius: 18px;
+        padding: 18px;
+        margin-bottom: 18px;
+        box-shadow: var(--ems-soft-shadow);
+    }
+
+    .ems-panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .ems-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--ems-primary-dark);
+    }
+
+    .ems-heading-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--ems-primary), var(--ems-secondary));
+    }
+
+    .ems-result-status {
+        font-size: 12px;
+        color: var(--ems-muted);
+    }
+
+    .ems-filter-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(150px, 1fr)) 150px;
+        gap: 14px;
+        align-items: end;
+    }
+
+    .ems-form-group {
+        min-width: 0;
+    }
+
+    .ems-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #40506a;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .65px;
+        text-transform: uppercase;
+    }
+
+    .ems-select,
+    .ems-search-input {
+        width: 100%;
+        height: 45px;
+        padding: 0 38px 0 13px;
+        border: 1px solid var(--ems-border);
+        border-radius: 11px;
+        outline: none;
+        color: var(--ems-text);
+        background-color: #fbfcfe;
+        font-size: 13px;
+        font-weight: 600;
+        transition: .2s ease;
+    }
+
+    .ems-select {
+        cursor: pointer;
+    }
+
+        .ems-select:focus,
+        .ems-search-input:focus {
+            border-color: var(--ems-secondary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(23,107,135,.10);
+        }
+
+        .ems-select:disabled {
+            cursor: not-allowed;
+            opacity: .65;
+            background: #f0f3f7;
+        }
+
+    .ems-refresh-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        height: 45px;
+        border: 0;
+        border-radius: 11px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--ems-primary), var(--ems-secondary));
+        box-shadow: 0 8px 18px rgba(18,60,105,.20);
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+        .ems-refresh-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(18,60,105,.27);
+        }
+
+        .ems-refresh-button:disabled {
+            cursor: wait;
+            opacity: .65;
+            transform: none;
+        }
+
+    .ems-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .ems-kpi-card {
+        position: relative;
+        overflow: hidden;
+        min-height: 142px;
+        padding: 20px;
+        border: 1px solid rgba(18,60,105,.06);
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: var(--ems-soft-shadow);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+        .ems-kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--ems-shadow);
+        }
+
+        .ems-kpi-card::after {
+            content: "";
+            position: absolute;
+            width: 115px;
+            height: 115px;
+            top: -42px;
+            right: -34px;
+            border-radius: 50%;
+            background: var(--kpi-soft);
+        }
+
+    .ems-kpi-top {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .ems-kpi-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        color: var(--kpi-color);
+        background: var(--kpi-soft);
+    }
+
+    .ems-kpi-number {
+        position: relative;
+        z-index: 2;
+        margin-top: 17px;
+        color: var(--ems-text);
+        font-size: 29px;
+        line-height: 1;
+        font-weight: 850;
+        letter-spacing: -.5px;
+    }
+
+    .ems-kpi-label {
+        position: relative;
+        z-index: 2;
+        margin-top: 8px;
+        color: var(--ems-muted);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .ems-kpi-stations {
+        --kpi-color: #176b87;
+        --kpi-soft: rgba(23,107,135,.11);
+    }
+
+    .ems-kpi-voters {
+        --kpi-color: #7357a8;
+        --kpi-soft: rgba(115,87,168,.11);
+    }
+
+    .ems-kpi-male {
+        --kpi-color: #2670c8;
+        --kpi-soft: rgba(38,112,200,.11);
+    }
+
+    .ems-kpi-female {
+        --kpi-color: #c14f87;
+        --kpi-soft: rgba(193,79,135,.11);
+    }
+
+    .ems-workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 385px;
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    .ems-map-card,
+    .ems-details-card {
+        overflow: hidden;
+        border: 1px solid rgba(18,60,105,.07);
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: var(--ems-shadow);
+    }
+
+    .ems-map-card {
+        min-width: 0;
+    }
+
+    .ems-map-toolbar {
+        min-height: 67px;
+        padding: 12px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        border-bottom: 1px solid var(--ems-border);
+        background: #fff;
+    }
+
+    .ems-map-heading {
+        min-width: 180px;
+    }
+
+    .ems-map-title {
+        margin: 0;
+        color: var(--ems-primary-dark);
+        font-size: 15px;
+        font-weight: 850;
+    }
+
+    .ems-map-subtitle {
+        margin-top: 4px;
+        color: var(--ems-muted);
+        font-size: 11px;
+    }
+
+    .ems-map-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .ems-search-wrap {
+        position: relative;
+        width: min(290px, 36vw);
+    }
+
+    .ems-search-input {
+        height: 40px;
+        padding-left: 38px;
+        padding-right: 12px;
+        font-weight: 500;
+    }
+
+    .ems-search-icon {
+        position: absolute;
+        top: 50%;
+        left: 13px;
+        transform: translateY(-50%);
+        color: #8793a6;
+        pointer-events: none;
+    }
+
+    .ems-map-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        border: 1px solid var(--ems-border);
+        border-radius: 10px;
+        color: var(--ems-primary);
+        background: #fff;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+        .ems-map-button:hover {
+            color: #fff;
+            border-color: var(--ems-primary);
+            background: var(--ems-primary);
+        }
+
+    #pollingStationsMap {
+        width: 100%;
+        height: 680px;
+        background: #e9eef4;
+    }
+
+    .ems-details-card {
+        height: 748px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ems-details-header {
+        flex: 0 0 auto;
+        padding: 18px 19px;
+        color: #fff;
+        background: linear-gradient(135deg, rgba(9,39,68,.97), rgba(23,107,135,.94)), var(--ems-primary);
+    }
+
+    .ems-details-eyebrow {
+        margin-bottom: 7px;
+        color: rgba(255,255,255,.70);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .ems-details-title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.35;
+        font-weight: 850;
+    }
+
+    .ems-details-location {
+        display: flex;
+        gap: 7px;
+        align-items: flex-start;
+        margin-top: 9px;
+        color: rgba(255,255,255,.78);
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .ems-details-body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 17px;
+        background: #f8fafc;
+    }
+
+    .ems-empty-selection {
+        height: 100%;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        text-align: center;
+        color: var(--ems-muted);
+    }
+
+    .ems-empty-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 82px;
+        height: 82px;
+        margin-bottom: 18px;
+        border-radius: 50%;
+        color: var(--ems-secondary);
+        background: rgba(23,107,135,.10);
+    }
+
+    .ems-empty-title {
+        margin: 0 0 7px;
+        color: var(--ems-primary-dark);
+        font-size: 16px;
+        font-weight: 850;
+    }
+
+    .ems-empty-text {
+        max-width: 280px;
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    .ems-breakdown-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 13px;
+    }
+
+    .ems-breakdown-card {
+        padding: 13px;
+        border: 1px solid var(--ems-border);
+        border-radius: 13px;
+        background: #fff;
+    }
+
+    .ems-breakdown-value {
+        color: var(--ems-primary-dark);
+        font-size: 19px;
+        font-weight: 850;
+    }
+
+    .ems-breakdown-label {
+        margin-top: 4px;
+        color: var(--ems-muted);
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: .45px;
+        text-transform: uppercase;
+    }
+
+    .ems-section-card {
+        margin-bottom: 12px;
+        padding: 15px;
+        border: 1px solid var(--ems-border);
+        border-radius: 14px;
+        background: #fff;
+    }
+
+        .ems-section-card:last-child {
+            margin-bottom: 0;
+        }
+
+    .ems-section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 12px;
+        color: var(--ems-primary-dark);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: .25px;
+        text-transform: uppercase;
+    }
+
+    .ems-info-list {
+        display: grid;
+        gap: 9px;
+    }
+
+    .ems-info-row {
+        display: grid;
+        grid-template-columns: 112px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        padding-bottom: 9px;
+        border-bottom: 1px dashed #e5e9ef;
+    }
+
+        .ems-info-row:last-child {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
+    .ems-info-label {
+        color: var(--ems-muted);
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: .25px;
+        text-transform: uppercase;
+    }
+
+    .ems-info-value {
+        overflow-wrap: anywhere;
+        color: #25344b;
+        font-size: 12px;
+        line-height: 1.45;
+        font-weight: 650;
+        text-align: right;
+    }
+
+    .ems-tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 12px;
+    }
+
+    .ems-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 9px;
+        border-radius: 999px;
+        color: var(--ems-primary);
+        background: rgba(18,60,105,.08);
+        font-size: 10px;
+        line-height: 1;
+        font-weight: 800;
+    }
+
+    .ems-coordinate-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        width: 100%;
+        height: 40px;
+        margin-top: 12px;
+        border: 1px solid rgba(23,107,135,.22);
+        border-radius: 10px;
+        color: var(--ems-secondary);
+        background: rgba(23,107,135,.06);
+        font-size: 11px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: .2s ease;
+    }
+
+        .ems-coordinate-button:hover {
+            color: #fff;
+            background: var(--ems-secondary);
+            text-decoration: none;
+        }
+
+    .ems-map-legend {
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,.96);
+        box-shadow: 0 5px 18px rgba(18,60,105,.18);
+        color: var(--ems-text);
+        font-size: 10px;
+        line-height: 1.4;
+    }
+
+    .ems-map-legend-title {
+        margin-bottom: 7px;
+        color: var(--ems-primary-dark);
+        font-weight: 850;
+        text-transform: uppercase;
+    }
+
+    .ems-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin: 5px 0;
+    }
+
+    .ems-legend-dot {
+        width: 10px;
+        height: 10px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px rgba(0,0,0,.15);
+    }
+
+    .ems-marker-container {
+        background: transparent;
+        border: 0;
+    }
+
+    .ems-map-marker {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border: 3px solid #fff;
+        border-radius: 50% 50% 50% 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.32);
+        transform: rotate(-45deg);
+    }
+
+        .ems-map-marker span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(45deg);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+    .ems-marker-male {
+        background: #2670c8;
+    }
+
+    .ems-marker-female {
+        background: #c14f87;
+    }
+
+    .ems-marker-combined {
+        background: #7357a8;
+    }
+
+    .ems-marker-other {
+        background: #176b87;
+    }
+
+    .ems-marker-estimated::after {
+        content: "";
+        position: absolute;
+        width: 9px;
+        height: 9px;
+        right: -2px;
+        top: -2px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background: #f1a521;
+    }
+
+    .ems-popup {
+        min-width: 285px;
+        max-width: 330px;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    .ems-popup-header {
+        margin: -14px -20px 13px;
+        padding: 14px 16px;
+        border-radius: 12px 12px 0 0;
+        color: #fff;
+        background: linear-gradient(135deg, var(--ems-primary-dark), var(--ems-secondary));
+    }
+
+    .ems-popup-title {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.4;
+        font-weight: 850;
+    }
+
+    .ems-popup-subtitle {
+        margin-top: 5px;
+        color: rgba(255,255,255,.75);
+        font-size: 10px;
+    }
+
+    .ems-popup-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 7px;
+        margin-bottom: 11px;
+    }
+
+    .ems-popup-kpi {
+        padding: 9px 6px;
+        border-radius: 9px;
+        background: #f3f6fa;
+        text-align: center;
+    }
+
+        .ems-popup-kpi strong {
+            display: block;
+            color: var(--ems-primary-dark);
+            font-size: 14px;
+        }
+
+        .ems-popup-kpi span {
+            color: var(--ems-muted);
+            font-size: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+    .ems-popup-meta {
+        display: grid;
+        gap: 6px;
+        font-size: 10px;
+    }
+
+    .ems-popup-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding-bottom: 5px;
+        border-bottom: 1px dashed #e2e6ec;
+    }
+
+        .ems-popup-row span:first-child {
+            color: var(--ems-muted);
+        }
+
+        .ems-popup-row span:last-child {
+            color: #29374c;
+            font-weight: 750;
+            text-align: right;
+        }
+
+    .ems-popup-button {
+        display: block;
+        width: 100%;
+        margin-top: 11px;
+        padding: 9px;
+        border: 0;
+        border-radius: 9px;
+        color: #fff;
+        background: var(--ems-primary);
+        font-size: 10px;
+        font-weight: 850;
+        cursor: pointer;
+    }
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 13px;
+        box-shadow: 0 12px 30px rgba(10,39,71,.22);
+    }
+
+    .leaflet-popup-content {
+        margin: 14px 20px 16px;
+    }
+
+    .marker-cluster-small,
+    .marker-cluster-medium,
+    .marker-cluster-large {
+        background: rgba(18,60,105,.22);
+    }
+
+        .marker-cluster-small div,
+        .marker-cluster-medium div,
+        .marker-cluster-large div {
+            color: #fff;
+            background: var(--ems-primary);
+            font-weight: 850;
+        }
+
+    .ems-loading-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 25px;
+        background: rgba(9,28,49,.47);
+        backdrop-filter: blur(3px);
+    }
+
+        .ems-loading-overlay.is-visible {
+            display: flex;
+        }
+
+    .ems-loader-card {
+        min-width: 275px;
+        padding: 25px;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 18px 50px rgba(0,0,0,.20);
+        text-align: center;
+    }
+
+    .ems-spinner {
+        width: 46px;
+        height: 46px;
+        margin: 0 auto 15px;
+        border: 4px solid #dce7ef;
+        border-top-color: var(--ems-secondary);
+        border-radius: 50%;
+        animation: emsSpin .8s linear infinite;
+    }
+
+    @@keyframes emsSpin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .ems-loader-title {
+        color: var(--ems-primary-dark);
+        font-size: 14px;
+        font-weight: 850;
+    }
+
+    .ems-loader-text {
+        margin-top: 6px;
+        color: var(--ems-muted);
+        font-size: 11px;
+    }
+
+    .ems-toast {
+        position: fixed;
+        z-index: 999999;
+        right: 22px;
+        bottom: 22px;
+        max-width: 380px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        color: #fff;
+        background: #24344a;
+        box-shadow: 0 12px 30px rgba(0,0,0,.20);
+        font-size: 12px;
+        line-height: 1.5;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(14px);
+        transition: .25s ease;
+    }
+
+        .ems-toast.is-visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .ems-toast.is-error {
+            background: var(--ems-danger);
+        }
+
+        .ems-toast.is-success {
+            background: var(--ems-success);
+        }
+
+    .ems-map-fullscreen {
+        position: fixed !important;
+        inset: 12px !important;
+        z-index: 99998 !important;
+        display: flex;
+        flex-direction: column;
+        border-radius: 18px;
+        box-shadow: 0 25px 80px rgba(0,0,0,.30);
+    }
+
+        .ems-map-fullscreen #pollingStationsMap {
+            flex: 1 1 auto;
+            height: auto;
+        }
+
+        .ems-map-fullscreen .ems-map-toolbar {
+            flex: 0 0 auto;
+        }
+
+    .ems-no-data {
+        padding: 18px;
+        border: 1px dashed #cfd8e4;
+        border-radius: 13px;
+        color: var(--ems-muted);
+        background: #f8fafc;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    @@media (max-width: 1250px) {
+        .ems-workspace {
+            grid-template-columns: minmax(0, 1fr) 340px;
+        }
+
+        .ems-filter-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+            .ems-filter-grid .ems-refresh-wrap {
+                grid-column: 1 / -1;
+            }
+
+        .ems-refresh-button {
+            width: 170px;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .ems-filter-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .ems-kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .ems-workspace {
+            grid-template-columns: 1fr;
+        }
+
+        .ems-details-card {
+            height: auto;
+            min-height: 500px;
+        }
+
+        #pollingStationsMap {
+            height: 600px;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .ems-page {
+            padding: 10px;
+        }
+
+        .ems-hero {
+            padding: 21px;
+            border-radius: 16px;
+        }
+
+        .ems-hero-content {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .ems-hero-title {
+            font-size: 22px;
+        }
+
+        .ems-filter-grid,
+        .ems-kpi-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ems-map-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .ems-map-actions {
+            width: 100%;
+        }
+
+        .ems-search-wrap {
+            width: 100%;
+        }
+
+        #pollingStationsMap {
+            height: 530px;
+        }
+
+        .ems-breakdown-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    .ems-scheme-section {
+    margin-top: 22px;
+    overflow: hidden;
+    border: 1px solid rgba(18, 60, 105, .08);
+    border-radius: 20px;
+    background: #f7f9fc;
+    box-shadow: 0 15px 40px rgba(27, 44, 75, .10);
+}
+
+.ems-scheme-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 23px 25px;
+    color: #fff;
+    background:
+        radial-gradient(
+            circle at 90% 15%,
+            rgba(255, 255, 255, .16),
+            transparent 25%
+        ),
+        linear-gradient(
+            130deg,
+            #092744 0%,
+            #123c69 55%,
+            #176b87 100%
+        );
+}
+
+.ems-scheme-eyebrow {
+    margin-bottom: 6px;
+    color: rgba(255, 255, 255, .65);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.ems-scheme-heading {
+    margin: 0;
+    color: #fff;
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 850;
+}
+
+.ems-scheme-subtitle {
+    margin: 7px 0 0;
+    color: rgba(255, 255, 255, .76);
+    font-size: 12px;
+}
+
+.ems-scheme-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ems-scheme-record-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 37px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(255, 255, 255, .10);
+    font-size: 11px;
+    font-weight: 800;
+    backdrop-filter: blur(6px);
+}
+
+.ems-scheme-close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    border: 1px solid rgba(255, 255, 255, .20);
+    border-radius: 10px;
+    color: #fff;
+    background: rgba(255, 255, 255, .10);
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.ems-scheme-close-button:hover {
+    background: rgba(255, 255, 255, .22);
+}
+
+#schemeContent {
+    padding: 20px;
+}
+
+.ems-scheme-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.ems-scheme-kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 100px;
+    padding: 17px;
+    border: 1px solid #e0e6ef;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 7px 20px rgba(27, 44, 75, .07);
+    transition: .2s ease;
+}
+
+.ems-scheme-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(27, 44, 75, .11);
+}
+
+.ems-scheme-kpi-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 47px;
+    height: 47px;
+    flex: 0 0 47px;
+    border-radius: 14px;
+}
+
+.ems-scheme-icon-area {
+    color: #176b87;
+    background: rgba(23, 107, 135, .11);
+}
+
+.ems-scheme-icon-total {
+    color: #7357a8;
+    background: rgba(115, 87, 168, .11);
+}
+
+.ems-scheme-icon-male {
+    color: #2670c8;
+    background: rgba(38, 112, 200, .11);
+}
+
+.ems-scheme-icon-female {
+    color: #c14f87;
+    background: rgba(193, 79, 135, .11);
+}
+
+.ems-scheme-icon-balance {
+    color: #138a58;
+    background: rgba(19, 138, 88, .11);
+}
+
+.ems-scheme-kpi-value {
+    color: #172133;
+    font-size: 23px;
+    line-height: 1.1;
+    font-weight: 850;
+}
+
+.ems-scheme-kpi-label {
+    margin-top: 6px;
+    color: #6f7c91;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .45px;
+    text-transform: uppercase;
+}
+
+.ems-scheme-visual-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, .75fr) minmax(500px, 1.6fr);
+    gap: 17px;
+    margin-bottom: 18px;
+}
+
+.ems-scheme-panel {
+    overflow: hidden;
+    border: 1px solid #e0e6ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 7px 22px rgba(27, 44, 75, .07);
+}
+
+.ems-scheme-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 17px 19px;
+    border-bottom: 1px solid #e5eaf1;
+}
+
+.ems-scheme-panel-header h3 {
+    margin: 0;
+    color: #0a2747;
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.ems-scheme-panel-header p {
+    margin: 5px 0 0;
+    color: #788499;
+    font-size: 10px;
+}
+
+.ems-chart-wrapper {
+    position: relative;
+    min-height: 350px;
+    padding: 18px;
+}
+
+.ems-chart-wrapper-small {
+    min-height: 350px;
+}
+
+.ems-scheme-table-header {
+    flex-wrap: wrap;
+}
+
+.ems-scheme-search-container {
+    position: relative;
+    width: 275px;
+}
+
+.ems-scheme-search-container svg {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    color: #8490a2;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.ems-scheme-search-container input {
+    width: 100%;
+    height: 39px;
+    padding: 0 12px 0 37px;
+    border: 1px solid #dce2eb;
+    border-radius: 10px;
+    outline: none;
+    color: #223149;
+    background: #fbfcfe;
+    font-size: 11px;
+}
+
+.ems-scheme-search-container input:focus {
+    border-color: #176b87;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(23, 107, 135, .09);
+}
+
+.ems-scheme-table-scroll {
+    overflow-x: auto;
+}
+
+.ems-scheme-table {
+    width: 100%;
+    min-width: 950px;
+    border-collapse: collapse;
+}
+
+.ems-scheme-table thead th {
+    padding: 13px 15px;
+    border-bottom: 1px solid #dfe5ee;
+    color: #526078;
+    background: #f6f8fb;
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: .55px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.ems-scheme-table tbody td {
+    padding: 13px 15px;
+    border-bottom: 1px solid #edf0f5;
+    color: #28374e;
+    font-size: 11px;
+    line-height: 1.45;
+    vertical-align: middle;
+}
+
+.ems-scheme-table tbody tr {
+    transition: .15s ease;
+}
+
+.ems-scheme-table tbody tr:hover {
+    background: #f6fafc;
+}
+
+.ems-scheme-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.ems-number-column {
+    text-align: right !important;
+}
+
+.ems-scheme-area-name {
+    max-width: 450px;
+    color: #172133;
+    font-weight: 700;
+}
+
+.ems-scheme-seat-badge {
+    display: inline-flex;
+    padding: 5px 8px;
+    border-radius: 999px;
+    color: #123c69;
+    background: rgba(18, 60, 105, .08);
+    font-size: 9px;
+    font-weight: 850;
+}
+
+.ems-scheme-voter-total {
+    color: #0a2747;
+    font-weight: 850;
+}
+
+.ems-scheme-gender-bars {
+    display: grid;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.ems-scheme-bar {
+    position: relative;
+    overflow: hidden;
+    height: 7px;
+    border-radius: 999px;
+    background: #edf1f6;
+}
+
+.ems-scheme-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.ems-scheme-bar-male {
+    background: #2670c8;
+}
+
+.ems-scheme-bar-female {
+    background: #c14f87;
+}
+
+.ems-scheme-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    color: #778397;
+    font-size: 8px;
+    font-weight: 750;
+}
+
+.ems-scheme-loading,
+.ems-scheme-error,
+.ems-scheme-empty {
+    min-height: 260px;
+    padding: 35px;
+}
+
+.ems-scheme-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 17px;
+    color: #172133;
+}
+
+.ems-scheme-loading strong {
+    display: block;
+    font-size: 14px;
+}
+
+.ems-scheme-loading span {
+    display: block;
+    margin-top: 5px;
+    color: #778397;
+    font-size: 11px;
+}
+
+.ems-scheme-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #dce6ef;
+    border-top-color: #176b87;
+    border-radius: 50%;
+    animation: emsSchemeSpin .8s linear infinite;
+}
+
+@@keyframes emsSchemeSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.ems-scheme-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b83246;
+    text-align: center;
+    font-size: 12px;
+}
+
+.ems-scheme-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #738095;
+    text-align: center;
+}
+
+.ems-scheme-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 78px;
+    height: 78px;
+    margin-bottom: 15px;
+    border-radius: 50%;
+    color: #176b87;
+    background: rgba(23, 107, 135, .10);
+}
+
+.ems-scheme-empty h3 {
+    margin: 0;
+    color: #0a2747;
+    font-size: 16px;
+    font-weight: 850;
+}
+
+.ems-scheme-empty p {
+    max-width: 450px;
+    margin: 8px 0 0;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+@@media (max-width: 1250px) {
+    .ems-scheme-kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .ems-scheme-visual-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@@media (max-width: 800px) {
+    .ems-scheme-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ems-scheme-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ems-scheme-header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .ems-scheme-search-container {
+        width: 100%;
+    }
+
+    .ems-scheme-table-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+@@media (max-width: 520px) {
+    .ems-scheme-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #schemeContent {
+        padding: 12px;
+    }
+
+    .ems-chart-wrapper,
+    .ems-chart-wrapper-small {
+        min-height: 300px;
+        padding: 10px;
+    }
+}
+</style>
+
+<div class="ems-page">
+
+    <section class="ems-hero">
+        <div class="ems-hero-content">
+            <div>
+                <h1 class="ems-hero-title">Election Polling Station Command Centre</h1>
+                <p class="ems-hero-subtitle">
+                    Explore polling-station coverage, voter distribution, booth capacity,
+                    geographic precision and election infrastructure from a unified operational map.
+                </p>
+            </div>
+
+            <div class="ems-live-badge">
+                <span class="ems-live-dot"></span>
+                Live GIS Intelligence
+            </div>
+        </div>
+    </section>
+
+    <section class="ems-filter-panel">
+        <div class="ems-panel-heading">
+            <h2 class="ems-panel-title">
+                <span class="ems-heading-icon">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 6h16M7 12h10M10 18h4"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round" />
+                    </svg>
+                </span>
+                Election Data Filters
+            </h2>
+
+            <div id="resultStatus" class="ems-result-status">
+                Preparing election data…
+            </div>
+        </div>
+
+        <div class="ems-filter-grid">
+            <div class="ems-form-group">
+                <label class="ems-label" for="filterElection">Election</label>
+                <select id="filterElection" class="ems-select">
+                    <option value="">All Elections</option>
+                </select>
+            </div>
+
+            <div class="ems-form-group">
+                <label class="ems-label" for="filterAssembly">Assembly</label>
+                <select id="filterAssembly" class="ems-select">
+                    <option value="">All Assemblies</option>
+                </select>
+            </div>
+
+            <div class="ems-form-group">
+                <label class="ems-label" for="filterSeat">Seat</label>
+                <select id="filterSeat" class="ems-select">
+                    <option value="">All Seats</option>
+                </select>
+            </div>
+
+            <div class="ems-form-group">
+                <label class="ems-label" for="filterYear">Year</label>
+                <select id="filterYear" class="ems-select">
+                    <option value="">All Years</option>
+                </select>
+            </div>
+
+            <div class="ems-form-group ems-refresh-wrap">
+                <label class="ems-label">&nbsp;</label>
+                <button type="button"
+                        id="refreshDataButton"
+                        class="ems-refresh-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 11a8 8 0 10-2.34 5.66"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round" />
+                        <path d="M20 5v6h-6"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round" />
+                    </svg>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="ems-kpi-grid">
+        <article class="ems-kpi-card ems-kpi-stations">
+            <div class="ems-kpi-top">
+                <div class="ems-kpi-icon">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 21s7-5.2 7-12a7 7 0 10-14 0c0 6.8 7 12 7 12z"
+                              stroke="currentColor"
+                              stroke-width="2" />
+                        <circle cx="12" cy="9" r="2.5"
+                                stroke="currentColor"
+                                stroke-width="2" />
+                    </svg>
+                </div>
+            </div>
+            <div id="kpiStations" class="ems-kpi-number">0</div>
+            <div class="ems-kpi-label">Polling Stations</div>
+        </article>
+
+        <article class="ems-kpi-card ems-kpi-voters">
+            <div class="ems-kpi-top">
+                <div class="ems-kpi-icon">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+                        <circle cx="8" cy="8" r="3"
+                                stroke="currentColor"
+                                stroke-width="2" />
+                        <circle cx="16" cy="9" r="2.5"
+                                stroke="currentColor"
+                                stroke-width="2" />
+                        <path d="M3 20c.5-4 2.3-6 5-6s4.5 2 5 6M13 15c3.8-.8 6 1 6.8 5"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round" />
+                    </svg>
+                </div>
+            </div>
+            <div id="kpiVoters" class="ems-kpi-number">0</div>
+            <div class="ems-kpi-label">Total Registered Voters</div>
+        </article>
+
+        <article class="ems-kpi-card ems-kpi-male">
+            <div class="ems-kpi-top">
+                <div class="ems-kpi-icon">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+                        <circle cx="10" cy="14" r="5"
+                                stroke="currentColor"
+                                stroke-width="2" />
+                        <path d="M14 10l6-6M15 4h5v5"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </div>
+            <div id="kpiMaleVoters" class="ems-kpi-number">0</div>
+            <div class="ems-kpi-label">Male Voters</div>
+        </article>
+
+        <article class="ems-kpi-card ems-kpi-female">
+            <div class="ems-kpi-top">
+                <div class="ems-kpi-icon">
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="9" r="5"
+                                stroke="currentColor"
+                                stroke-width="2" />
+                        <path d="M12 14v7M9 18h6"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round" />
+                    </svg>
+                </div>
+            </div>
+            <div id="kpiFemaleVoters" class="ems-kpi-number">0</div>
+            <div class="ems-kpi-label">Female Voters</div>
+        </article>
+    </section>
+
+    <section class="ems-workspace">
+
+        <article id="mapCard" class="ems-map-card">
+            <div class="ems-map-toolbar">
+                <div class="ems-map-heading">
+                    <h2 class="ems-map-title">Polling Station Geographic Distribution</h2>
+                    <div id="mapSummary" class="ems-map-subtitle">
+                        Waiting for polling-station coordinates
+                    </div>
+                </div>
+
+                <div class="ems-map-actions">
+                    <div class="ems-search-wrap">
+                        <span class="ems-search-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                <circle cx="11" cy="11" r="7"
+                                        stroke="currentColor"
+                                        stroke-width="2" />
+                                <path d="M16.5 16.5L21 21"
+                                      stroke="currentColor"
+                                      stroke-width="2"
+                                      stroke-linecap="round" />
+                            </svg>
+                        </span>
+
+                        <input type="text"
+                               id="stationSearch"
+                               class="ems-search-input"
+                               placeholder="Search station, district, tehsil or seat..." />
+                    </div>
+
+                    <button type="button"
+                            id="resetMapButton"
+                            class="ems-map-button"
+                            title="Reset map extent">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" />
+                        </svg>
+                    </button>
+
+                    <button type="button"
+                            id="fullscreenMapButton"
+                            class="ems-map-button"
+                            title="Open fullscreen map">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                            <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="pollingStationsMap"></div>
+        </article>
+
+        <aside class="ems-details-card">
+            <header class="ems-details-header">
+                <div class="ems-details-eyebrow">Selected polling station</div>
+                <h2 id="detailsTitle" class="ems-details-title">
+                    Polling Station Information
+                </h2>
+                <div id="detailsLocation" class="ems-details-location">
+                    Select a marker on the map to inspect its complete election,
+                    voter, booth and geographic information.
+                </div>
+            </header>
+
+            <div id="detailsBody" class="ems-details-body">
+                <div class="ems-empty-selection">
+                    <div class="ems-empty-icon">
+                        <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 21s7-5.2 7-12a7 7 0 10-14 0c0 6.8 7 12 7 12z"
+                                  stroke="currentColor"
+                                  stroke-width="1.7" />
+                            <circle cx="12" cy="9" r="2.5"
+                                    stroke="currentColor"
+                                    stroke-width="1.7" />
+                        </svg>
+                    </div>
+                    <h3 class="ems-empty-title">No station selected</h3>
+                    <p class="ems-empty-text">
+                        Click any polling-station marker to view its voters,
+                        booths, election classification, source matching and
+                        geographic precision.
+                    </p>
+                </div>
+            </div>
+        </aside>
+    </section>
+    <section id="pollingSchemeSection"
+             class="ems-scheme-section"
+             style="display:none;">
+
+        <div class="ems-scheme-header">
+            <div>
+                <div class="ems-scheme-eyebrow">
+                    Detailed Polling Scheme
+                </div>
+
+                <h2 id="schemeHeading" class="ems-scheme-heading">
+                    Polling Station Profile
+                </h2>
+
+                <p id="schemeSubtitle" class="ems-scheme-subtitle">
+                    Area-wise voters and polling coverage
+                </p>
+            </div>
+
+            <div class="ems-scheme-header-actions">
+                <span id="schemeRecordBadge"
+                      class="ems-scheme-record-badge">
+                    0 areas
+                </span>
+
+                <button type="button"
+                        id="closeSchemeButton"
+                        class="ems-scheme-close-button"
+                        title="Close polling scheme">
+                    <svg width="18"
+                         height="18"
+                         viewBox="0 0 24 24"
+                         fill="none">
+                        <path d="M6 6l12 12M18 6L6 18"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="schemeLoadingState"
+             class="ems-scheme-loading"
+             style="display:none;">
+            <div class="ems-scheme-spinner"></div>
+
+            <div>
+                <strong>Loading polling scheme</strong>
+                <span>
+                    Retrieving area-wise voter information…
+                </span>
+            </div>
+        </div>
+
+        <div id="schemeErrorState"
+             class="ems-scheme-error"
+             style="display:none;">
+        </div>
+
+        <div id="schemeContent"
+             style="display:none;">
+
+            <div class="ems-scheme-kpi-grid">
+
+                <article class="ems-scheme-kpi-card">
+                    <div class="ems-scheme-kpi-icon ems-scheme-icon-area">
+                        <svg width="22"
+                             height="22"
+                             viewBox="0 0 24 24"
+                             fill="none">
+                            <path d="M4 5h16v14H4z"
+                                  stroke="currentColor"
+                                  stroke-width="2" />
+                            <path d="M8 9h8M8 13h5"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div id="schemeAreaCount"
+                             class="ems-scheme-kpi-value">
+                            0
+                        </div>
+
+                        <div class="ems-scheme-kpi-label">
+                            Polling Areas
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ems-scheme-kpi-card">
+                    <div class="ems-scheme-kpi-icon ems-scheme-icon-total">
+                        <svg width="22"
+                             height="22"
+                             viewBox="0 0 24 24"
+                             fill="none">
+                            <circle cx="8"
+                                    cy="8"
+                                    r="3"
+                                    stroke="currentColor"
+                                    stroke-width="2" />
+
+                            <circle cx="16"
+                                    cy="9"
+                                    r="2.5"
+                                    stroke="currentColor"
+                                    stroke-width="2" />
+
+                            <path d="M3 20c.5-4 2.3-6 5-6s4.5 2 5 6M13 15c3.8-.8 6 1 6.8 5"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div id="schemeTotalVoters"
+                             class="ems-scheme-kpi-value">
+                            0
+                        </div>
+
+                        <div class="ems-scheme-kpi-label">
+                            Total Voters
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ems-scheme-kpi-card">
+                    <div class="ems-scheme-kpi-icon ems-scheme-icon-male">
+                        <svg width="22"
+                             height="22"
+                             viewBox="0 0 24 24"
+                             fill="none">
+                            <circle cx="10"
+                                    cy="14"
+                                    r="5"
+                                    stroke="currentColor"
+                                    stroke-width="2" />
+
+                            <path d="M14 10l6-6M15 4h5v5"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div id="schemeMaleVoters"
+                             class="ems-scheme-kpi-value">
+                            0
+                        </div>
+
+                        <div class="ems-scheme-kpi-label">
+                            Male Voters
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ems-scheme-kpi-card">
+                    <div class="ems-scheme-kpi-icon ems-scheme-icon-female">
+                        <svg width="22"
+                             height="22"
+                             viewBox="0 0 24 24"
+                             fill="none">
+                            <circle cx="12"
+                                    cy="9"
+                                    r="5"
+                                    stroke="currentColor"
+                                    stroke-width="2" />
+
+                            <path d="M12 14v7M9 18h6"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div id="schemeFemaleVoters"
+                             class="ems-scheme-kpi-value">
+                            0
+                        </div>
+
+                        <div class="ems-scheme-kpi-label">
+                            Female Voters
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ems-scheme-kpi-card">
+                    <div class="ems-scheme-kpi-icon ems-scheme-icon-balance">
+                        <svg width="22"
+                             height="22"
+                             viewBox="0 0 24 24"
+                             fill="none">
+                            <path d="M12 3v18M5 7h14M5 7l-3 6h6L5 7zM19 7l-3 6h6l-3-6z"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div id="schemeGenderRatio"
+                             class="ems-scheme-kpi-value">
+                            0%
+                        </div>
+
+                        <div class="ems-scheme-kpi-label">
+                            Female Share
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+
+            <div class="ems-scheme-visual-grid">
+
+                <article class="ems-scheme-panel">
+                    <div class="ems-scheme-panel-header">
+                        <div>
+                            <h3>Gender Distribution</h3>
+                            <p>
+                                Male and female voter composition
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="ems-chart-wrapper ems-chart-wrapper-small">
+                        <canvas id="schemeGenderChart"></canvas>
+                    </div>
+                </article>
+
+                <article class="ems-scheme-panel">
+                    <div class="ems-scheme-panel-header">
+                        <div>
+                            <h3>Area-wise Voter Distribution</h3>
+                            <p>
+                                Largest polling areas by registered voters
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="ems-chart-wrapper">
+                        <canvas id="schemeAreaChart"></canvas>
+                    </div>
+                </article>
+
+            </div>
+
+            <article class="ems-scheme-panel ems-scheme-table-panel">
+
+                <div class="ems-scheme-panel-header ems-scheme-table-header">
+                    <div>
+                        <h3>Polling Scheme Details</h3>
+                        <p>
+                            Complete area-level voter distribution
+                        </p>
+                    </div>
+
+                    <div class="ems-scheme-search-container">
+                        <svg width="15"
+                             height="15"
+                             viewBox="0 0 24 24"
+                             fill="none">
+                            <circle cx="11"
+                                    cy="11"
+                                    r="7"
+                                    stroke="currentColor"
+                                    stroke-width="2" />
+
+                            <path d="M16.5 16.5L21 21"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round" />
+                        </svg>
+
+                        <input type="text"
+                               id="schemeAreaSearch"
+                               placeholder="Search polling area..." />
+                    </div>
+                </div>
+
+                <div class="ems-scheme-table-scroll">
+                    <table class="ems-scheme-table">
+                        <thead>
+                            <tr>
+                                <th>Sr.</th>
+                                <th>Seat</th>
+                                <th>Polling Area</th>
+                                <th class="ems-number-column">Block</th>
+                                <th class="ems-number-column">Male Voters</th>
+                                <th class="ems-number-column">Female Voters</th>
+                                <th class="ems-number-column">Total Voters</th>
+                                <th>Distribution</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="schemeTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+            </article>
+
+        </div>
+
+        <div id="schemeEmptyState"
+             class="ems-scheme-empty"
+             style="display:none;">
+
+            <div class="ems-scheme-empty-icon">
+                <svg width="40"
+                     height="40"
+                     viewBox="0 0 24 24"
+                     fill="none">
+                    <path d="M4 5h16v14H4z"
+                          stroke="currentColor"
+                          stroke-width="1.7" />
+
+                    <path d="M8 9h8M8 13h5"
+                          stroke="currentColor"
+                          stroke-width="1.7"
+                          stroke-linecap="round" />
+                </svg>
+            </div>
+
+            <h3>No polling scheme found</h3>
+
+            <p>
+                No area-level polling scheme was returned for this
+                polling-station serial number.
+            </p>
+        </div>
+
+    </section>
+</div>
+
+<div id="loadingOverlay" class="ems-loading-overlay">
+    <div class="ems-loader-card">
+        <div class="ems-spinner"></div>
+        <div class="ems-loader-title">Loading polling stations</div>
+        <div class="ems-loader-text">
+            Retrieving election, voter and geographic information…
+        </div>
+    </div>
+</div>
+
+<div id="emsToast" class="ems-toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        crossorigin=""></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    "use strict";
+
+    var getPollingStationsUrl = '@Html.Raw(HttpUtility.JavaScriptStringEncode(pollingStationsUrl))';
+    var getPollingSchemeUrl = '@Html.Raw(HttpUtility.JavaScriptStringEncode(pollingSchemeUrl))';
+    var state = {
+        allData: [],
+        visibleData: [],
+        map: null,
+        markerCluster: null,
+        markerRecords: [],
+        selectedRecord: null,
+        requestNumber: 0,
+        filtersInitialized: false,
+        isFullscreen: false,
+        initialBounds: null,
+
+        schemeData: [],
+        schemeRequestNumber: 0,
+        schemeGenderChart: null,
+        schemeAreaChart: null
+    };
+
+    var elements = {};
+
+    document.addEventListener("DOMContentLoaded", function () {
+        cacheElements();
+        initializeMap();
+        bindEvents();
+        loadPollingStations(true);
+    });
+
+    function cacheElements() {
+        elements.filterElection = document.getElementById("filterElection");
+        elements.filterAssembly = document.getElementById("filterAssembly");
+        elements.filterSeat = document.getElementById("filterSeat");
+        elements.filterYear = document.getElementById("filterYear");
+
+        elements.refreshDataButton = document.getElementById("refreshDataButton");
+        elements.stationSearch = document.getElementById("stationSearch");
+        elements.resetMapButton = document.getElementById("resetMapButton");
+        elements.fullscreenMapButton = document.getElementById("fullscreenMapButton");
+
+        elements.kpiStations = document.getElementById("kpiStations");
+        elements.kpiVoters = document.getElementById("kpiVoters");
+        elements.kpiMaleVoters = document.getElementById("kpiMaleVoters");
+        elements.kpiFemaleVoters = document.getElementById("kpiFemaleVoters");
+
+        elements.resultStatus = document.getElementById("resultStatus");
+        elements.mapSummary = document.getElementById("mapSummary");
+        elements.mapCard = document.getElementById("mapCard");
+
+        elements.detailsTitle = document.getElementById("detailsTitle");
+        elements.detailsLocation = document.getElementById("detailsLocation");
+        elements.detailsBody = document.getElementById("detailsBody");
+
+        elements.loadingOverlay = document.getElementById("loadingOverlay");
+        elements.toast = document.getElementById("emsToast");
+
+        elements.pollingSchemeSection =
+            document.getElementById("pollingSchemeSection");
+
+        elements.schemeHeading =
+            document.getElementById("schemeHeading");
+
+        elements.schemeSubtitle =
+            document.getElementById("schemeSubtitle");
+
+        elements.schemeRecordBadge =
+            document.getElementById("schemeRecordBadge");
+
+        elements.schemeLoadingState =
+            document.getElementById("schemeLoadingState");
+
+        elements.schemeErrorState =
+            document.getElementById("schemeErrorState");
+
+        elements.schemeContent =
+            document.getElementById("schemeContent");
+
+        elements.schemeEmptyState =
+            document.getElementById("schemeEmptyState");
+
+        elements.schemeAreaCount =
+            document.getElementById("schemeAreaCount");
+
+        elements.schemeTotalVoters =
+            document.getElementById("schemeTotalVoters");
+
+        elements.schemeMaleVoters =
+            document.getElementById("schemeMaleVoters");
+
+        elements.schemeFemaleVoters =
+            document.getElementById("schemeFemaleVoters");
+
+        elements.schemeGenderRatio =
+            document.getElementById("schemeGenderRatio");
+
+        elements.schemeTableBody =
+            document.getElementById("schemeTableBody");
+
+        elements.schemeAreaSearch =
+            document.getElementById("schemeAreaSearch");
+
+        elements.closeSchemeButton =
+            document.getElementById("closeSchemeButton");
+    }
+
+    function bindEvents() {
+        elements.filterElection.addEventListener("change", function () {
+            loadPollingStations(false);
+        });
+
+        elements.filterAssembly.addEventListener("change", function () {
+            loadPollingStations(false);
+        });
+
+        elements.filterSeat.addEventListener("change", function () {
+            loadPollingStations(false);
+        });
+
+        elements.filterYear.addEventListener("change", function () {
+            loadPollingStations(false);
+        });
+
+        elements.refreshDataButton.addEventListener("click", function () {
+            loadPollingStations(false);
+        });
+
+        elements.stationSearch.addEventListener(
+            "input",
+            debounce(function () {
+                applyClientSearch();
+            }, 250)
+        );
+
+        elements.resetMapButton.addEventListener("click", function () {
+            fitMapToVisibleMarkers();
+        });
+
+        elements.fullscreenMapButton.addEventListener("click", function () {
+            toggleFullscreenMap();
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && state.isFullscreen) {
+                toggleFullscreenMap(false);
+            }
+        });
+
+        elements.closeSchemeButton.addEventListener(
+            "click",
+            function () {
+                closePollingScheme();
+            }
+        );
+
+        elements.schemeAreaSearch.addEventListener(
+            "input",
+            debounce(function () {
+                filterPollingSchemeTable();
+            }, 200)
+        );
+    }
+
+    function initializeMap() {
+        state.map = L.map("pollingStationsMap", {
+            zoomControl: true,
+            preferCanvas: true,
+            minZoom: 3,
+            maxZoom: 19
+        }).setView([30.3753, 69.3451], 5);
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+            }
+        ).addTo(state.map);
+
+        state.markerCluster = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            spiderfyOnMaxZoom: true,
+            removeOutsideVisibleBounds: true,
+            animate: true,
+            chunkedLoading: true,
+            chunkInterval: 100,
+            chunkDelay: 20,
+            maxClusterRadius: 55
+        });
+
+        state.map.addLayer(state.markerCluster);
+        addMapLegend();
+
+        setTimeout(function () {
+            state.map.invalidateSize();
+        }, 200);
+    }
+
+    function addMapLegend() {
+        var legend = L.control({ position: "bottomright" });
+
+        legend.onAdd = function () {
+            var div = L.DomUtil.create("div", "ems-map-legend");
+
+            div.innerHTML =
+                '<div class="ems-map-legend-title">Station Category</div>' +
+                legendItem("#2670c8", "Male") +
+                legendItem("#c14f87", "Female") +
+                legendItem("#7357a8", "Combined") +
+                legendItem("#176b87", "Other / Unspecified") +
+                '<div style="margin-top:7px;color:#7c8798;">' +
+                    '<span style="color:#f1a521;font-weight:900;">●</span> ' +
+                    'Estimated or non-point geometry' +
+                '</div>';
+
+            L.DomEvent.disableClickPropagation(div);
+            return div;
+        };
+
+        legend.addTo(state.map);
+    }
+
+    function legendItem(color, text) {
+        return '<div class="ems-legend-item">' +
+            '<span class="ems-legend-dot" style="background:' + color + ';"></span>' +
+            '<span>' + escapeHtml(text) + '</span>' +
+        '</div>';
+    }
+
+    async function loadPollingStations(initialLoad) {
+        var currentRequest = ++state.requestNumber;
+        var filters = getSelectedFilters();
+        var url = buildRequestUrl(filters);
+
+        setLoading(true);
+        setFilterControlsDisabled(true);
+
+        try {
+            var response = await fetch(url, {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    "The server returned HTTP " +
+                    response.status +
+                    " " +
+                    response.statusText
+                );
+            }
+
+            var responseObject = await response.json();
+
+            if (currentRequest !== state.requestNumber) {
+                return;
+            }
+
+            var records = extractDataArray(responseObject)
+                .map(normalizeRecord);
+
+            state.allData = records;
+
+            populateFilterOptions(records, filters, initialLoad);
+
+            state.visibleData = records;
+            elements.stationSearch.value = "";
+
+            updateDashboard(records);
+            renderMarkers(records);
+            clearSelectedStation();
+
+            state.filtersInitialized = true;
+
+            showToast(
+                formatNumber(records.length) +
+                " polling-station records loaded.",
+                "success"
+            );
+        }
+        catch (error) {
+            console.error("Polling station loading failed:", error);
+
+            state.allData = [];
+            state.visibleData = [];
+
+            updateDashboard([]);
+            renderMarkers([]);
+            clearSelectedStation();
+
+            elements.resultStatus.textContent = "Unable to load election data";
+
+            showToast(
+                "Polling-station data could not be loaded. " + error.message,
+                "error"
+            );
+        }
+        finally {
+            if (currentRequest === state.requestNumber) {
+                setLoading(false);
+                setFilterControlsDisabled(false);
+            }
+        }
+    }
+
+    function buildRequestUrl(filters) {
+        var query = [];
+
+        if (filters.year) {
+            query.push("year=" + encodeURIComponent(filters.year));
+        }
+
+        if (filters.election) {
+            query.push("election=" + encodeURIComponent(filters.election));
+        }
+
+        if (filters.assembly) {
+            query.push("assembly=" + encodeURIComponent(filters.assembly));
+        }
+
+        if (filters.seat) {
+            query.push("seat=" + encodeURIComponent(filters.seat));
+        }
+
+        query.push("_=" + new Date().getTime());
+
+        return getPollingStationsUrl +
+            (getPollingStationsUrl.indexOf("?") >= 0 ? "&" : "?") +
+            query.join("&");
+    }
+
+    function getSelectedFilters() {
+        return {
+            election: elements.filterElection.value || "",
+            assembly: elements.filterAssembly.value || "",
+            seat: elements.filterSeat.value || "",
+            year: elements.filterYear.value || ""
+        };
+    }
+
+    function extractDataArray(responseObject) {
+        if (Array.isArray(responseObject)) {
+            return responseObject;
+        }
+
+        if (responseObject && Array.isArray(responseObject.data)) {
+            return responseObject.data;
+        }
+
+        if (responseObject && Array.isArray(responseObject.Data)) {
+            return responseObject.Data;
+        }
+
+        return [];
+    }
+
+    function normalizeRecord(item, index) {
+        item = item || {};
+
+        return {
+            __index: index,
+
+            Election: getProperty(item, "Election"),
+            Year: toNullableNumber(getProperty(item, "Year")),
+            Assembly: getProperty(item, "Assembly"),
+            Seat: getProperty(item, "Seat"),
+            Tehsil: getProperty(item, "Tehsil"),
+            Sr: toNullableNumber(getProperty(item, "Sr")),
+            SType: getProperty(item, "SType"),
+            Station: getProperty(item, "Station"),
+
+            MVoter: toNumber(getProperty(item, "MVoter")),
+            FVoter: toNumber(getProperty(item, "FVoter")),
+            Voter: toNumber(getProperty(item, "Voter")),
+
+            MBooth: toNumber(getProperty(item, "MBooth")),
+            FBooth: toNumber(getProperty(item, "FBooth")),
+            Booth: toNumber(getProperty(item, "Booth")),
+
+            PollingStation: getProperty(item, "PollingStation"),
+            Category: getProperty(item, "Category"),
+            District: getProperty(item, "District"),
+            Source: getProperty(item, "Source"),
+            MatchedPlace: getProperty(item, "MatchedPlace"),
+            GeometryType: getProperty(item, "GeometryType"),
+
+            Latitude: toNullableNumber(getProperty(item, "Latitude")),
+            Longitude: toNullableNumber(getProperty(item, "Longitude")),
+            OffsetMeters: toNullableNumber(getProperty(item, "OffsetMeters")),
+            Precision: getProperty(item, "Precision")
+        };
+    }
+
+    function getProperty(object, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(object, propertyName)) {
+            return object[propertyName];
+        }
+
+        var camelName =
+            propertyName.charAt(0).toLowerCase() +
+            propertyName.substring(1);
+
+        if (Object.prototype.hasOwnProperty.call(object, camelName)) {
+            return object[camelName];
+        }
+
+        return null;
+    }
+
+    function populateFilterOptions(records, selectedFilters, initialLoad) {
+        var elections = uniqueSorted(
+            records.map(function (x) { return x.Election; })
+        );
+
+        var assemblies = uniqueSorted(
+            records.map(function (x) { return x.Assembly; })
+        );
+
+        var seats = uniqueSorted(
+            records.map(function (x) { return x.Seat; }),
+            naturalSort
+        );
+
+        var years = uniqueSorted(
+            records.map(function (x) { return x.Year; }),
+            function (a, b) {
+                return Number(b) - Number(a);
+            }
+        );
+
+        populateSelect(
+            elements.filterElection,
+            elections,
+            "All Elections",
+            selectedFilters.election
+        );
+
+        populateSelect(
+            elements.filterAssembly,
+            assemblies,
+            "All Assemblies",
+            selectedFilters.assembly
+        );
+
+        populateSelect(
+            elements.filterSeat,
+            seats,
+            "All Seats",
+            selectedFilters.seat
+        );
+
+        var preferredYear = selectedFilters.year;
+
+        if (initialLoad && !preferredYear) {
+            var currentYear = String(new Date().getFullYear());
+
+            if (years.map(String).indexOf(currentYear) >= 0) {
+                preferredYear = currentYear;
+            }
+        }
+
+        populateSelect(
+            elements.filterYear,
+            years,
+            "All Years",
+            preferredYear
+        );
+    }
+
+    function populateSelect(selectElement, values, emptyText, selectedValue) {
+        var selectedText = selectedValue == null
+            ? ""
+            : String(selectedValue);
+
+        var html =
+            '<option value="">' +
+            escapeHtml(emptyText) +
+            '</option>';
+
+        values.forEach(function (value) {
+            var stringValue = String(value);
+            var selected = stringValue === selectedText
+                ? " selected"
+                : "";
+
+            html +=
+                '<option value="' +
+                escapeAttribute(stringValue) +
+                '"' +
+                selected +
+                '>' +
+                escapeHtml(stringValue) +
+                '</option>';
+        });
+
+        selectElement.innerHTML = html;
+
+        if (
+            selectedText &&
+            !Array.from(selectElement.options).some(function (option) {
+                return option.value === selectedText;
+            })
+        ) {
+            var retainedOption = document.createElement("option");
+            retainedOption.value = selectedText;
+            retainedOption.textContent = selectedText;
+            retainedOption.selected = true;
+            selectElement.appendChild(retainedOption);
+        }
+    }
+
+    function uniqueSorted(values, sortFunction) {
+        var valueMap = {};
+
+        values.forEach(function (value) {
+            if (
+                value !== null &&
+                value !== undefined &&
+                String(value).trim() !== ""
+            ) {
+                valueMap[String(value).trim()] = value;
+            }
+        });
+
+        var result = Object.keys(valueMap).map(function (key) {
+            return valueMap[key];
+        });
+
+        return result.sort(sortFunction || naturalSort);
+    }
+
+    function naturalSort(a, b) {
+        return String(a).localeCompare(
+            String(b),
+            undefined,
+            {
+                numeric: true,
+                sensitivity: "base"
+            }
+        );
+    }
+
+    function updateDashboard(records) {
+        var totals = records.reduce(function (result, record) {
+            result.voters += record.Voter;
+            result.male += record.MVoter;
+            result.female += record.FVoter;
+            return result;
+        }, {
+            voters: 0,
+            male: 0,
+            female: 0
+        });
+
+        /*
+           Some sources may leave Voter blank while male/female values exist.
+           In that situation, use male + female for the overall total.
+        */
+        if (totals.voters === 0 && (totals.male > 0 || totals.female > 0)) {
+            totals.voters = totals.male + totals.female;
+        }
+
+        animateNumber(elements.kpiStations, records.length);
+        animateNumber(elements.kpiVoters, totals.voters);
+        animateNumber(elements.kpiMaleVoters, totals.male);
+        animateNumber(elements.kpiFemaleVoters, totals.female);
+
+        var validCoordinates = records.filter(hasValidCoordinates).length;
+        var invalidCoordinates = records.length - validCoordinates;
+
+        elements.resultStatus.textContent =
+            formatNumber(records.length) +
+            " records • " +
+            formatNumber(validCoordinates) +
+            " mapped";
+
+        elements.mapSummary.textContent =
+            formatNumber(validCoordinates) +
+            " mapped stations" +
+            (invalidCoordinates > 0
+                ? " • " +
+                  formatNumber(invalidCoordinates) +
+                  " without valid coordinates"
+                : "");
+    }
+
+    function renderMarkers(records) {
+        state.markerCluster.clearLayers();
+        state.markerRecords = [];
+        state.initialBounds = null;
+
+        var validRecords = records.filter(hasValidCoordinates);
+        var bounds = [];
+
+        validRecords.forEach(function (record) {
+            var marker = createMarker(record);
+
+            state.markerCluster.addLayer(marker);
+            state.markerRecords.push({
+                record: record,
+                marker: marker
+            });
+
+            bounds.push([record.Latitude, record.Longitude]);
+        });
+
+        if (bounds.length > 0) {
+            state.initialBounds = L.latLngBounds(bounds);
+
+            state.map.fitBounds(state.initialBounds, {
+                padding: [35, 35],
+                maxZoom: 14
+            });
+        }
+        else {
+            state.map.setView([30.3753, 69.3451], 5);
+        }
+
+        setTimeout(function () {
+            state.map.invalidateSize();
+        }, 100);
+    }
+
+    function createMarker(record) {
+        var marker = L.marker(
+            [record.Latitude, record.Longitude],
+            {
+                icon: createStationIcon(record),
+                title: displayValue(
+                    record.PollingStation || record.Station,
+                    "Polling station"
+                ),
+                riseOnHover: true,
+                keyboard: true
+            }
+        );
+
+        marker.bindPopup(buildPopupHtml(record), {
+            maxWidth: 350,
+            minWidth: 290,
+            autoPanPadding: [30, 30]
+        });
+
+        marker.on("click", function () {
+            showStationDetails(record);
+        });
+
+        marker.on("popupopen", function () {
+            showStationDetails(record);
+        });
+
+        return marker;
+    }
+
+    function createStationIcon(record) {
+        var categoryClass = getCategoryClass(record.Category);
+        var estimatedClass = isEstimatedGeometry(record)
+            ? " ems-marker-estimated"
+            : "";
+
+        var symbol = getMarkerSymbol(record);
+
+        return L.divIcon({
+            className: "ems-marker-container",
+            html:
+                '<div class="ems-map-marker ' +
+                categoryClass +
+                estimatedClass +
+                '">' +
+                    '<span>' + escapeHtml(symbol) + '</span>' +
+                '</div>',
+            iconSize: [38, 42],
+            iconAnchor: [19, 40],
+            popupAnchor: [0, -36]
+        });
+    }
+
+    function getCategoryClass(category) {
+        var text = String(category || "").toLowerCase();
+
+        if (text.indexOf("combined") >= 0 ||
+            text.indexOf("mix") >= 0 ||
+            text.indexOf("both") >= 0) {
+            return "ems-marker-combined";
+        }
+
+        if (text.indexOf("female") >= 0 ||
+            text.indexOf("women") >= 0) {
+            return "ems-marker-female";
+        }
+
+        if (text.indexOf("male") >= 0 ||
+            text.indexOf("men") >= 0) {
+            return "ems-marker-male";
+        }
+
+        return "ems-marker-other";
+    }
+
+    function getMarkerSymbol(record) {
+        var geometry = String(record.GeometryType || "").toLowerCase();
+
+        if (geometry.indexOf("polygon") >= 0) {
+            return "◆";
+        }
+
+        if (geometry.indexOf("line") >= 0) {
+            return "━";
+        }
+
+        var category = String(record.Category || "").toLowerCase();
+
+        if (category.indexOf("female") >= 0) {
+            return "F";
+        }
+
+        if (category.indexOf("male") >= 0 &&
+            category.indexOf("female") < 0) {
+            return "M";
+        }
+
+        if (
+            category.indexOf("combined") >= 0 ||
+            category.indexOf("both") >= 0 ||
+            category.indexOf("mix") >= 0
+        ) {
+            return "C";
+        }
+
+        return "●";
+    }
+
+    function isEstimatedGeometry(record) {
+        var geometry = String(record.GeometryType || "").toLowerCase();
+        var precision = String(record.Precision || "").toLowerCase();
+
+        return (
+            geometry &&
+            geometry !== "point" &&
+            geometry !== "multipoint"
+        ) ||
+        precision.indexOf("estimate") >= 0 ||
+        precision.indexOf("approx") >= 0 ||
+        (record.OffsetMeters !== null && record.OffsetMeters > 100);
+    }
+
+    function buildPopupHtml(record) {
+        var stationName = displayValue(
+            record.PollingStation || record.Station,
+            "Unnamed Polling Station"
+        );
+
+        return (
+            '<div class="ems-popup">' +
+                '<div class="ems-popup-header">' +
+                    '<h3 class="ems-popup-title">' +
+                        escapeHtml(stationName) +
+                    '</h3>' +
+                    '<div class="ems-popup-subtitle">' +
+                        escapeHtml(joinNonEmpty([
+                            record.Seat,
+                            record.Assembly,
+                            record.District
+                        ], " • ")) +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="ems-popup-kpis">' +
+                    popupKpi(record.Voter, "Voters") +
+                    popupKpi(record.Booth, "Booths") +
+                    popupKpi(record.Sr, "Serial") +
+                '</div>' +
+
+                '<div class="ems-popup-meta">' +
+                    popupRow("Category", record.Category) +
+                    popupRow("Male voters", formatNumber(record.MVoter)) +
+                    popupRow("Female voters", formatNumber(record.FVoter)) +
+                    popupRow("Tehsil", record.Tehsil) +
+                    popupRow("Geometry", record.GeometryType) +
+                    popupRow("Precision", record.Precision) +
+                '</div>' +
+
+                '<button type="button" ' +
+                        'class="ems-popup-button" ' +
+                        'onclick="window.ElectionMap.loadScheme(' +
+                        record.__index +
+                        ')">' +
+                    'View Complete Station Profile' +
+                '</button>' +
+            '</div>'
+        );
+    }
+
+    function popupKpi(value, label) {
+        return (
+            '<div class="ems-popup-kpi">' +
+                '<strong>' + escapeHtml(formatNumber(value)) + '</strong>' +
+                '<span>' + escapeHtml(label) + '</span>' +
+            '</div>'
+        );
+    }
+
+    function popupRow(label, value) {
+        return (
+            '<div class="ems-popup-row">' +
+                '<span>' + escapeHtml(label) + '</span>' +
+                '<span>' + escapeHtml(displayValue(value)) + '</span>' +
+            '</div>'
+        );
+    }
+
+    function showStationDetails(record) {
+        state.selectedRecord = record;
+
+        var stationName = displayValue(
+            record.PollingStation || record.Station,
+            "Unnamed Polling Station"
+        );
+
+        elements.detailsTitle.textContent = stationName;
+
+        elements.detailsLocation.innerHTML =
+            locationIconSvg() +
+            '<span>' +
+                escapeHtml(joinNonEmpty([
+                    record.Tehsil,
+                    record.District
+                ], ", ") || "Administrative location not available") +
+            '</span>';
+
+        var totalVoters = record.Voter;
+
+        if (!totalVoters && (record.MVoter || record.FVoter)) {
+            totalVoters = record.MVoter + record.FVoter;
+        }
+
+        var totalBooths = record.Booth;
+
+        if (!totalBooths && (record.MBooth || record.FBooth)) {
+            totalBooths = record.MBooth + record.FBooth;
+        }
+
+        elements.detailsBody.innerHTML =
+            '<div class="ems-breakdown-grid">' +
+                breakdownCard(totalVoters, "Total voters") +
+                breakdownCard(totalBooths, "Total booths") +
+                breakdownCard(record.MVoter, "Male voters") +
+                breakdownCard(record.FVoter, "Female voters") +
+                breakdownCard(record.MBooth, "Male booths") +
+                breakdownCard(record.FBooth, "Female booths") +
+            '</div>' +
+
+            sectionCard(
+                "Election Classification",
+                electionIconSvg(),
+                infoRows([
+                    ["Election", record.Election],
+                    ["Election Year", record.Year],
+                    ["Assembly", record.Assembly],
+                    ["Seat", record.Seat],
+                    ["Station Type", record.SType],
+                    ["Serial Number", record.Sr]
+                ])
+            ) +
+
+            sectionCard(
+                "Polling Station Location",
+                locationSmallIconSvg(),
+                infoRows([
+                    ["Station", record.Station],
+                    ["Polling Station", record.PollingStation],
+                    ["Category", record.Category],
+                    ["Tehsil", record.Tehsil],
+                    ["District", record.District]
+                ]) +
+                tagRow([
+                    record.Category,
+                    record.SType,
+                    record.Seat
+                ])
+            ) +
+
+            sectionCard(
+                "Geographic Intelligence",
+                mapIconSvg(),
+                infoRows([
+                    ["Latitude", coordinateValue(record.Latitude)],
+                    ["Longitude", coordinateValue(record.Longitude)],
+                    ["Geometry Type", record.GeometryType],
+                    ["Precision", record.Precision],
+                    ["Offset", offsetValue(record.OffsetMeters)],
+                    ["Matched Place", record.MatchedPlace],
+                    ["Source", record.Source]
+                ]) +
+                googleMapsButton(record)
+            );
+    }
+
+    function breakdownCard(value, label) {
+        return (
+            '<div class="ems-breakdown-card">' +
+                '<div class="ems-breakdown-value">' +
+                    escapeHtml(formatNumber(value)) +
+                '</div>' +
+                '<div class="ems-breakdown-label">' +
+                    escapeHtml(label) +
+                '</div>' +
+            '</div>'
+        );
+    }
+
+    function sectionCard(title, icon, body) {
+        return (
+            '<section class="ems-section-card">' +
+                '<h3 class="ems-section-title">' +
+                    icon +
+                    escapeHtml(title) +
+                '</h3>' +
+                body +
+            '</section>'
+        );
+    }
+
+    function infoRows(rows) {
+        var html = '<div class="ems-info-list">';
+
+        rows.forEach(function (row) {
+            html +=
+                '<div class="ems-info-row">' +
+                    '<div class="ems-info-label">' +
+                        escapeHtml(row[0]) +
+                    '</div>' +
+                    '<div class="ems-info-value">' +
+                        escapeHtml(displayValue(row[1])) +
+                    '</div>' +
+                '</div>';
+        });
+
+        html += '</div>';
+        return html;
+    }
+
+    function tagRow(values) {
+        var tags = values.filter(function (value) {
+            return value !== null &&
+                value !== undefined &&
+                String(value).trim() !== "";
+        });
+
+        if (!tags.length) {
+            return "";
+        }
+
+        return (
+            '<div class="ems-tag-row">' +
+                tags.map(function (value) {
+                    return (
+                        '<span class="ems-tag">' +
+                            escapeHtml(String(value)) +
+                        '</span>'
+                    );
+                }).join("") +
+            '</div>'
+        );
+    }
+
+    function googleMapsButton(record) {
+        if (!hasValidCoordinates(record)) {
+            return "";
+        }
+
+        var url =
+            "https://www.google.com/maps?q=" +
+            encodeURIComponent(record.Latitude + "," + record.Longitude);
+
+        return (
+            '<a class="ems-coordinate-button" ' +
+               'href="' + escapeAttribute(url) + '" ' +
+               'target="_blank" rel="noopener noreferrer">' +
+                mapIconSvg() +
+                'Open Coordinates in Google Maps' +
+            '</a>'
+        );
+    }
+
+    function clearSelectedStation() {
+        state.selectedRecord = null;
+
+        elements.detailsTitle.textContent =
+            "Polling Station Information";
+
+        elements.detailsLocation.textContent =
+            "Select a marker on the map to inspect its complete election, " +
+            "voter, booth and geographic information.";
+
+        elements.detailsBody.innerHTML =
+            '<div class="ems-empty-selection">' +
+                '<div class="ems-empty-icon">' +
+                    locationLargeIconSvg() +
+                '</div>' +
+                '<h3 class="ems-empty-title">No station selected</h3>' +
+                '<p class="ems-empty-text">' +
+                    'Click any polling-station marker to view its voters, ' +
+                    'booths, election classification, source matching and ' +
+                    'geographic precision.' +
+                '</p>' +
+            '</div>';
+    }
+
+    function applyClientSearch() {
+        var searchText = String(elements.stationSearch.value || "")
+            .trim()
+            .toLowerCase();
+
+        if (!searchText) {
+            state.visibleData = state.allData.slice();
+        }
+        else {
+            state.visibleData = state.allData.filter(function (record) {
+                var searchableText = [
+                    record.PollingStation,
+                    record.Station,
+                    record.District,
+                    record.Tehsil,
+                    record.Seat,
+                    record.Assembly,
+                    record.Election,
+                    record.Category,
+                    record.MatchedPlace,
+                    record.Source
+                ].join(" ").toLowerCase();
+
+                return searchableText.indexOf(searchText) >= 0;
+            });
+        }
+
+        updateDashboard(state.visibleData);
+        renderMarkers(state.visibleData);
+        clearSelectedStation();
+
+        if (searchText && state.visibleData.length === 0) {
+            showToast(
+                "No polling station matched your search.",
+                "error"
+            );
+        }
+    }
+
+    function fitMapToVisibleMarkers() {
+        if (state.initialBounds && state.initialBounds.isValid()) {
+            state.map.fitBounds(state.initialBounds, {
+                padding: [35, 35],
+                maxZoom: 14
+            });
+        }
+        else {
+            state.map.setView([30.3753, 69.3451], 5);
+        }
+    }
+
+    function toggleFullscreenMap(forceState) {
+        var shouldEnable =
+            typeof forceState === "boolean"
+                ? forceState
+                : !state.isFullscreen;
+
+        state.isFullscreen = shouldEnable;
+
+        elements.mapCard.classList.toggle(
+            "ems-map-fullscreen",
+            shouldEnable
+        );
+
+        document.body.style.overflow =
+            shouldEnable ? "hidden" : "";
+
+        elements.fullscreenMapButton.title =
+            shouldEnable
+                ? "Exit fullscreen map"
+                : "Open fullscreen map";
+
+        setTimeout(function () {
+            state.map.invalidateSize();
+            fitMapToVisibleMarkers();
+        }, 250);
+    }
+
+    function setLoading(isLoading) {
+        elements.loadingOverlay.classList.toggle(
+            "is-visible",
+            isLoading
+        );
+
+        elements.refreshDataButton.disabled = isLoading;
+    }
+
+    function setFilterControlsDisabled(disabled) {
+        elements.filterElection.disabled = disabled;
+        elements.filterAssembly.disabled = disabled;
+        elements.filterSeat.disabled = disabled;
+        elements.filterYear.disabled = disabled;
+    }
+
+    function showToast(message, type) {
+        window.clearTimeout(showToast.timer);
+
+        elements.toast.textContent = message;
+        elements.toast.className =
+            "ems-toast is-visible " +
+            (type === "error"
+                ? "is-error"
+                : "is-success");
+
+        showToast.timer = window.setTimeout(function () {
+            elements.toast.classList.remove("is-visible");
+        }, 4200);
+    }
+
+    function animateNumber(element, targetValue) {
+        var target = Math.max(0, toNumber(targetValue));
+        var duration = 550;
+        var startTime = null;
+        var initialValue = toNumber(
+            String(element.textContent || "0").replace(/,/g, "")
+        );
+
+        function step(timestamp) {
+            if (!startTime) {
+                startTime = timestamp;
+            }
+
+            var progress = Math.min(
+                (timestamp - startTime) / duration,
+                1
+            );
+
+            var easedProgress = 1 - Math.pow(1 - progress, 3);
+            var current =
+                initialValue +
+                ((target - initialValue) * easedProgress);
+
+            element.textContent = formatNumber(Math.round(current));
+
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        }
+
+        window.requestAnimationFrame(step);
+    }
+
+    function hasValidCoordinates(record) {
+        return (
+            record.Latitude !== null &&
+            record.Longitude !== null &&
+            isFinite(record.Latitude) &&
+            isFinite(record.Longitude) &&
+            record.Latitude >= -90 &&
+            record.Latitude <= 90 &&
+            record.Longitude >= -180 &&
+            record.Longitude <= 180 &&
+            !(record.Latitude === 0 && record.Longitude === 0)
+        );
+    }
+
+    function toNumber(value) {
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
+            return 0;
+        }
+
+        var parsed = Number(
+            String(value).replace(/,/g, "")
+        );
+
+        return isFinite(parsed) ? parsed : 0;
+    }
+
+    function toNullableNumber(value) {
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
+            return null;
+        }
+
+        var parsed = Number(
+            String(value).replace(/,/g, "")
+        );
+
+        return isFinite(parsed) ? parsed : null;
+    }
+
+    function formatNumber(value) {
+        var number = toNumber(value);
+
+        return number.toLocaleString("en-US", {
+            maximumFractionDigits: 0
+        });
+    }
+
+    function coordinateValue(value) {
+        if (value === null || !isFinite(value)) {
+            return "Not available";
+        }
+
+        return Number(value).toFixed(6);
+    }
+
+    function offsetValue(value) {
+        if (value === null || !isFinite(value)) {
+            return "Not available";
+        }
+
+        return Number(value).toLocaleString("en-US", {
+            maximumFractionDigits: 1
+        }) + " metres";
+    }
+
+    function displayValue(value, fallback) {
+        if (
+            value === null ||
+            value === undefined ||
+            String(value).trim() === ""
+        ) {
+            return fallback || "Not available";
+        }
+
+        return String(value);
+    }
+
+    function joinNonEmpty(values, separator) {
+        return values
+            .filter(function (value) {
+                return value !== null &&
+                    value !== undefined &&
+                    String(value).trim() !== "";
+            })
+            .join(separator);
+    }
+
+    function escapeHtml(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function escapeAttribute(value) {
+        return escapeHtml(value)
+            .replace(/`/g, "&#096;");
+    }
+
+    function debounce(func, delay) {
+        var timer;
+
+        return function () {
+            var context = this;
+            var args = arguments;
+
+            window.clearTimeout(timer);
+
+            timer = window.setTimeout(function () {
+                func.apply(context, args);
+            }, delay);
+        };
+    }
+
+    function locationIconSvg() {
+        return (
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" ' +
+                 'style="flex:0 0 auto;margin-top:1px;">' +
+                '<path d="M12 21s7-5.2 7-12a7 7 0 10-14 0c0 6.8 7 12 7 12z" ' +
+                      'stroke="currentColor" stroke-width="2"/>' +
+                '<circle cx="12" cy="9" r="2.5" ' +
+                        'stroke="currentColor" stroke-width="2"/>' +
+            '</svg>'
+        );
+    }
+
+    function locationLargeIconSvg() {
+        return (
+            '<svg width="38" height="38" viewBox="0 0 24 24" fill="none">' +
+                '<path d="M12 21s7-5.2 7-12a7 7 0 10-14 0c0 6.8 7 12 7 12z" ' +
+                      'stroke="currentColor" stroke-width="1.7"/>' +
+                '<circle cx="12" cy="9" r="2.5" ' +
+                        'stroke="currentColor" stroke-width="1.7"/>' +
+            '</svg>'
+        );
+    }
+
+    function electionIconSvg() {
+        return (
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none">' +
+                '<rect x="4" y="7" width="16" height="13" rx="2" ' +
+                      'stroke="currentColor" stroke-width="2"/>' +
+                '<path d="M8 7l2-4h4l2 4M9 12h6" ' +
+                      'stroke="currentColor" stroke-width="2" ' +
+                      'stroke-linecap="round"/>' +
+            '</svg>'
+        );
+    }
+
+    function locationSmallIconSvg() {
+        return (
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none">' +
+                '<path d="M12 21s7-5.2 7-12a7 7 0 10-14 0c0 6.8 7 12 7 12z" ' +
+                      'stroke="currentColor" stroke-width="2"/>' +
+                '<circle cx="12" cy="9" r="2.5" ' +
+                        'stroke="currentColor" stroke-width="2"/>' +
+            '</svg>'
+        );
+    }
+
+    function mapIconSvg() {
+        return (
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none">' +
+                '<path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z" ' +
+                      'stroke="currentColor" stroke-width="2" ' +
+                      'stroke-linejoin="round"/>' +
+                '<path d="M9 3v15M15 6v15" ' +
+                      'stroke="currentColor" stroke-width="2"/>' +
+            '</svg>'
+        );
+    }
+    async function loadPollingScheme(record) {
+        if (!record) {
+            showToast(
+                "The selected polling station could not be identified.",
+                "error"
+            );
+
+            return;
+        }
+
+        if (
+            record.Sr === null ||
+            record.Sr === undefined ||
+            record.Sr === ""
+        ) {
+            showToast(
+                "This polling station does not have a serial number.",
+                "error"
+            );
+
+            return;
+        }
+
+        state.selectedRecord = record;
+
+        var currentRequest = ++state.schemeRequestNumber;
+        var filters = getSelectedFilters();
+        var requestUrl = buildPollingSchemeUrl(
+            filters,
+            record.Sr
+        );
+
+        openSchemeSection(record);
+        setSchemeLoading(true);
+
+        try {
+            var response = await fetch(requestUrl, {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    "The server returned HTTP " +
+                    response.status +
+                    " " +
+                    response.statusText
+                );
+            }
+
+            var result = await response.json();
+
+            if (currentRequest !== state.schemeRequestNumber) {
+                return;
+            }
+
+            var schemeRows = extractDataArray(result)
+                .map(normalizeSchemeRecord);
+
+            state.schemeData = schemeRows;
+
+            if (!schemeRows.length) {
+                showSchemeEmptyState(record);
+                return;
+            }
+
+            renderPollingScheme(record, schemeRows);
+
+            showToast(
+                formatNumber(schemeRows.length) +
+                " polling-scheme areas loaded.",
+                "success"
+            );
+        }
+        catch (error) {
+            console.error(
+                "Polling scheme loading failed:",
+                error
+            );
+
+            showSchemeError(
+                "The polling scheme could not be loaded. " +
+                error.message
+            );
+        }
+        finally {
+            if (currentRequest === state.schemeRequestNumber) {
+                setSchemeLoading(false);
+            }
+        }
+    }
+    function buildPollingSchemeUrl(filters, sr) {
+        var query = [];
+
+        if (filters.year) {
+            query.push(
+                "year=" +
+                encodeURIComponent(filters.year)
+            );
+        }
+
+        if (filters.election) {
+            query.push(
+                "election=" +
+                encodeURIComponent(filters.election)
+            );
+        }
+
+        if (filters.assembly) {
+            query.push(
+                "assembly=" +
+                encodeURIComponent(filters.assembly)
+            );
+        }
+
+        if (filters.seat) {
+            query.push(
+                "seat=" +
+                encodeURIComponent(filters.seat)
+            );
+        }
+
+        query.push(
+            "sr=" +
+            encodeURIComponent(sr)
+        );
+
+        query.push(
+            "_=" +
+            new Date().getTime()
+        );
+
+        return getPollingSchemeUrl +
+            (getPollingSchemeUrl.indexOf("?") >= 0
+                ? "&"
+                : "?") +
+            query.join("&");
+    }
+    function normalizeSchemeRecord(item, index) {
+        item = item || {};
+
+        return {
+            __index: index,
+
+            Seat: getProperty(item, "Seat"),
+
+            Sr: toNullableNumber(
+                getProperty(item, "Sr")
+            ),
+
+            Area: getProperty(item, "Area"),
+
+            Bl: toNullableNumber(
+                getProperty(item, "Bl")
+            ),
+
+            MVoter: toNumber(
+                getProperty(item, "MVoter")
+            ),
+
+            FVoter: toNumber(
+                getProperty(item, "FVoter")
+            ),
+
+            Voter: toNumber(
+                getProperty(item, "Voter")
+            )
+        };
+    }
+    function openSchemeSection(record) {
+        elements.pollingSchemeSection.style.display = "block";
+
+        elements.schemeHeading.textContent =
+            displayValue(
+                record.PollingStation || record.Station,
+                "Polling Station Profile"
+            );
+
+        elements.schemeSubtitle.textContent =
+            joinNonEmpty(
+                [
+                    record.Seat,
+                    record.Assembly,
+                    record.District,
+                    "Serial No. " + record.Sr
+                ],
+                " • "
+            );
+
+        elements.schemeRecordBadge.textContent =
+            "Loading scheme…";
+
+        elements.schemeAreaSearch.value = "";
+
+        window.setTimeout(function () {
+            elements.pollingSchemeSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }, 120);
+    }
+    function setSchemeLoading(isLoading) {
+        elements.schemeLoadingState.style.display =
+            isLoading ? "flex" : "none";
+
+        if (isLoading) {
+            elements.schemeContent.style.display = "none";
+            elements.schemeEmptyState.style.display = "none";
+            elements.schemeErrorState.style.display = "none";
+        }
+    }
+    function renderPollingScheme(record, rows) {
+        var totals = rows.reduce(
+            function (result, row) {
+                var rowTotal = row.Voter;
+
+                if (
+                    rowTotal === 0 &&
+                    (row.MVoter > 0 || row.FVoter > 0)
+                ) {
+                    rowTotal =
+                        row.MVoter +
+                        row.FVoter;
+                }
+
+                result.total += rowTotal;
+                result.male += row.MVoter;
+                result.female += row.FVoter;
+
+                return result;
+            },
+            {
+                total: 0,
+                male: 0,
+                female: 0
+            }
+        );
+
+        if (
+            totals.total === 0 &&
+            (totals.male > 0 || totals.female > 0)
+        ) {
+            totals.total =
+                totals.male +
+                totals.female;
+        }
+
+        var femaleShare =
+            totals.total > 0
+                ? (totals.female / totals.total) * 100
+                : 0;
+
+        elements.schemeAreaCount.textContent =
+            formatNumber(rows.length);
+
+        elements.schemeTotalVoters.textContent =
+            formatNumber(totals.total);
+
+        elements.schemeMaleVoters.textContent =
+            formatNumber(totals.male);
+
+        elements.schemeFemaleVoters.textContent =
+            formatNumber(totals.female);
+
+        elements.schemeGenderRatio.textContent =
+            femaleShare.toFixed(1) + "%";
+
+        elements.schemeRecordBadge.textContent =
+            formatNumber(rows.length) +
+            (rows.length === 1
+                ? " area"
+                : " areas");
+
+        elements.schemeContent.style.display = "block";
+        elements.schemeEmptyState.style.display = "none";
+        elements.schemeErrorState.style.display = "none";
+
+        renderSchemeTable(rows);
+        renderSchemeGenderChart(totals);
+        renderSchemeAreaChart(rows);
+    }
+    function renderSchemeTable(rows) {
+        if (!rows.length) {
+            elements.schemeTableBody.innerHTML =
+                '<tr>' +
+                '<td colspan="8">' +
+                '<div class="ems-no-data">' +
+                'No polling areas matched the search.' +
+                '</div>' +
+                '</td>' +
+                '</tr>';
+
+            return;
+        }
+
+        var html = "";
+
+        rows.forEach(function (row, index) {
+            var totalVoters = row.Voter;
+
+            if (
+                totalVoters === 0 &&
+                (row.MVoter > 0 || row.FVoter > 0)
+            ) {
+                totalVoters =
+                    row.MVoter +
+                    row.FVoter;
+            }
+
+            var malePercentage =
+                totalVoters > 0
+                    ? (row.MVoter / totalVoters) * 100
+                    : 0;
+
+            var femalePercentage =
+                totalVoters > 0
+                    ? (row.FVoter / totalVoters) * 100
+                    : 0;
+
+            html +=
+                '<tr>' +
+
+                '<td>' +
+                escapeHtml(
+                    String(index + 1)
+                ) +
+                '</td>' +
+
+                '<td>' +
+                '<span class="ems-scheme-seat-badge">' +
+                escapeHtml(
+                    displayValue(row.Seat)
+                ) +
+                '</span>' +
+                '</td>' +
+
+                '<td>' +
+                '<div class="ems-scheme-area-name">' +
+                escapeHtml(
+                    displayValue(
+                        row.Area,
+                        "Area not specified"
+                    )
+                ) +
+                '</div>' +
+                '</td>' +
+
+                '<td class="ems-number-column">' +
+                escapeHtml(
+                    displayBlockNumber(row.Bl)
+                ) +
+                '</td>' +
+
+                '<td class="ems-number-column">' +
+                escapeHtml(
+                    formatNumber(row.MVoter)
+                ) +
+                '</td>' +
+
+                '<td class="ems-number-column">' +
+                escapeHtml(
+                    formatNumber(row.FVoter)
+                ) +
+                '</td>' +
+
+                '<td class="ems-number-column">' +
+                '<span class="ems-scheme-voter-total">' +
+                escapeHtml(
+                    formatNumber(totalVoters)
+                ) +
+                '</span>' +
+                '</td>' +
+
+                '<td>' +
+                buildGenderDistributionBars(
+                    malePercentage,
+                    femalePercentage
+                ) +
+                '</td>' +
+
+                '</tr>';
+        });
+
+        elements.schemeTableBody.innerHTML = html;
+    }
+    function buildGenderDistributionBars(
+        malePercentage,
+        femalePercentage
+    ) {
+        return (
+            '<div class="ems-scheme-gender-bars">' +
+
+            '<div class="ems-scheme-bar-labels">' +
+            '<span>Male ' +
+            malePercentage.toFixed(1) +
+            '%</span>' +
+
+            '<span>Female ' +
+            femalePercentage.toFixed(1) +
+            '%</span>' +
+            '</div>' +
+
+            '<div class="ems-scheme-bar">' +
+            '<div class="ems-scheme-bar-fill ems-scheme-bar-male" ' +
+            'style="width:' +
+            Math.min(100, malePercentage) +
+            '%;"></div>' +
+            '</div>' +
+
+            '<div class="ems-scheme-bar">' +
+            '<div class="ems-scheme-bar-fill ems-scheme-bar-female" ' +
+            'style="width:' +
+            Math.min(100, femalePercentage) +
+            '%;"></div>' +
+            '</div>' +
+
+            '</div>'
+        );
+    }
+    function displayBlockNumber(value) {
+        if (
+            value === null ||
+            value === undefined ||
+            String(value).trim() === ""
+        ) {
+            return "Not available";
+        }
+
+        return String(value);
+    }
+    function renderSchemeGenderChart(totals) {
+        if (state.schemeGenderChart) {
+            state.schemeGenderChart.destroy();
+            state.schemeGenderChart = null;
+        }
+
+        var canvas =
+            document.getElementById("schemeGenderChart");
+
+        if (!canvas) {
+            return;
+        }
+
+        state.schemeGenderChart = new Chart(
+            canvas.getContext("2d"),
+            {
+                type: "doughnut",
+
+                data: {
+                    labels: [
+                        "Male Voters",
+                        "Female Voters"
+                    ],
+
+                    datasets: [
+                        {
+                            data: [
+                                totals.male,
+                                totals.female
+                            ],
+
+                            backgroundColor: [
+                                "#2670c8",
+                                "#c14f87"
+                            ],
+
+                            borderColor: "#ffffff",
+                            borderWidth: 4,
+                            hoverOffset: 8
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "67%",
+
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                padding: 18,
+                                font: {
+                                    size: 11,
+                                    weight: "600"
+                                }
+                            }
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    var value =
+                                        context.parsed || 0;
+
+                                    var total =
+                                        totals.male +
+                                        totals.female;
+
+                                    var percentage =
+                                        total > 0
+                                            ? (
+                                                value /
+                                                total *
+                                                100
+                                            ).toFixed(1)
+                                            : "0.0";
+
+                                    return (
+                                        context.label +
+                                        ": " +
+                                        formatNumber(value) +
+                                        " (" +
+                                        percentage +
+                                        "%)"
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    }
+    function renderSchemeAreaChart(rows) {
+        if (state.schemeAreaChart) {
+            state.schemeAreaChart.destroy();
+            state.schemeAreaChart = null;
+        }
+
+        var canvas =
+            document.getElementById("schemeAreaChart");
+
+        if (!canvas) {
+            return;
+        }
+
+        var chartRows = rows
+            .map(function (row) {
+                return {
+                    area: displayValue(
+                        row.Area,
+                        "Unnamed Area"
+                    ),
+
+                    male: row.MVoter,
+                    female: row.FVoter,
+
+                    total:
+                        row.Voter > 0
+                            ? row.Voter
+                            : row.MVoter + row.FVoter
+                };
+            })
+            .sort(function (a, b) {
+                return b.total - a.total;
+            })
+            .slice(0, 15);
+
+        state.schemeAreaChart = new Chart(
+            canvas.getContext("2d"),
+            {
+                type: "bar",
+
+                data: {
+                    labels: chartRows.map(
+                        function (row) {
+                            return truncateText(
+                                row.area,
+                                35
+                            );
+                        }
+                    ),
+
+                    datasets: [
+                        {
+                            label: "Male Voters",
+
+                            data: chartRows.map(
+                                function (row) {
+                                    return row.male;
+                                }
+                            ),
+
+                            backgroundColor:
+                                "rgba(38, 112, 200, .82)",
+
+                            borderColor:
+                                "#2670c8",
+
+                            borderWidth: 1,
+                            borderRadius: 5
+                        },
+                        {
+                            label: "Female Voters",
+
+                            data: chartRows.map(
+                                function (row) {
+                                    return row.female;
+                                }
+                            ),
+
+                            backgroundColor:
+                                "rgba(193, 79, 135, .82)",
+
+                            borderColor:
+                                "#c14f87",
+
+                            borderWidth: 1,
+                            borderRadius: 5
+                        }
+                    ]
+                },
+
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        mode: "index",
+                        intersect: false
+                    },
+
+                    scales: {
+                        x: {
+                            stacked: true,
+                            beginAtZero: true,
+
+                            grid: {
+                                color:
+                                    "rgba(50, 65, 90, .07)"
+                            },
+
+                            ticks: {
+                                callback: function (value) {
+                                    return Number(value)
+                                        .toLocaleString(
+                                            "en-US"
+                                        );
+                                }
+                            }
+                        },
+
+                        y: {
+                            stacked: true,
+
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                padding: 18,
+                                font: {
+                                    size: 11,
+                                    weight: "600"
+                                }
+                            }
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return (
+                                        context.dataset.label +
+                                        ": " +
+                                        formatNumber(
+                                            context.parsed.x
+                                        )
+                                    );
+                                },
+
+                                footer: function (items) {
+                                    var total = items.reduce(
+                                        function (
+                                            result,
+                                            item
+                                        ) {
+                                            return (
+                                                result +
+                                                item.parsed.x
+                                            );
+                                        },
+                                        0
+                                    );
+
+                                    return (
+                                        "Total: " +
+                                        formatNumber(total)
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    }
+    function truncateText(value, maximumLength) {
+        var text = String(value || "");
+
+        if (text.length <= maximumLength) {
+            return text;
+        }
+
+        return text.substring(
+            0,
+            maximumLength - 1
+        ) + "…";
+    }
+    function filterPollingSchemeTable() {
+        var searchText =
+            String(
+                elements.schemeAreaSearch.value || ""
+            )
+                .trim()
+                .toLowerCase();
+
+        if (!searchText) {
+            renderSchemeTable(
+                state.schemeData
+            );
+
+            return;
+        }
+
+        var filteredRows =
+            state.schemeData.filter(
+                function (row) {
+                    var searchableText = [
+                        row.Area,
+                        row.Seat,
+                        row.Sr,
+                        row.Bl
+                    ]
+                        .join(" ")
+                        .toLowerCase();
+
+                    return (
+                        searchableText.indexOf(
+                            searchText
+                        ) >= 0
+                    );
+                }
+            );
+
+        renderSchemeTable(filteredRows);
+    }
+    function showSchemeEmptyState(record) {
+        destroySchemeCharts();
+
+        elements.schemeContent.style.display = "none";
+        elements.schemeErrorState.style.display = "none";
+        elements.schemeEmptyState.style.display = "flex";
+
+        elements.schemeRecordBadge.textContent =
+            "No areas";
+
+        elements.schemeHeading.textContent =
+            displayValue(
+                record.PollingStation || record.Station,
+                "Polling Station Profile"
+            );
+    }
+    function showSchemeError(message) {
+        destroySchemeCharts();
+
+        elements.schemeContent.style.display = "none";
+        elements.schemeEmptyState.style.display = "none";
+        elements.schemeErrorState.style.display = "flex";
+
+        elements.schemeErrorState.innerHTML =
+            '<div>' +
+            '<strong style="display:block;margin-bottom:7px;">' +
+            'Unable to load polling scheme' +
+            '</strong>' +
+
+            '<span>' +
+            escapeHtml(message) +
+            '</span>' +
+            '</div>';
+
+        elements.schemeRecordBadge.textContent =
+            "Load failed";
+    }
+
+    function closePollingScheme() {
+        ++state.schemeRequestNumber;
+
+        state.schemeData = [];
+
+        destroySchemeCharts();
+
+        elements.pollingSchemeSection.style.display = "none";
+        elements.schemeContent.style.display = "none";
+        elements.schemeEmptyState.style.display = "none";
+        elements.schemeErrorState.style.display = "none";
+        elements.schemeLoadingState.style.display = "none";
+        elements.schemeAreaSearch.value = "";
+    }
+    function destroySchemeCharts() {
+        if (state.schemeGenderChart) {
+            state.schemeGenderChart.destroy();
+            state.schemeGenderChart = null;
+        }
+
+        if (state.schemeAreaChart) {
+            state.schemeAreaChart.destroy();
+            state.schemeAreaChart = null;
+        }
+    }
+    window.ElectionMap = {
+        showDetails: function (recordIndex) {
+            var record = state.allData.find(
+                function (item) {
+                    return (
+                        item.__index ===
+                        recordIndex
+                    );
+                }
+            );
+
+            if (!record) {
+                return;
+            }
+
+            showStationDetails(record);
+
+            var markerRecord =
+                state.markerRecords.find(
+                    function (item) {
+                        return (
+                            item.record.__index ===
+                            recordIndex
+                        );
+                    }
+                );
+
+            if (markerRecord) {
+                state.markerCluster.zoomToShowLayer(
+                    markerRecord.marker,
+                    function () {
+                        markerRecord.marker.openPopup();
+                    }
+                );
+            }
+        },
+
+        loadScheme: function (recordIndex) {
+            var record = state.allData.find(
+                function (item) {
+                    return (
+                        item.__index ===
+                        recordIndex
+                    );
+                }
+            );
+
+            if (!record) {
+                showToast(
+                    "The polling station record could not be found.",
+                    "error"
+                );
+
+                return;
+            }
+
+            showStationDetails(record);
+
+            var markerRecord =
+                state.markerRecords.find(
+                    function (item) {
+                        return (
+                            item.record.__index ===
+                            recordIndex
+                        );
+                    }
+                );
+
+            if (markerRecord) {
+                markerRecord.marker.closePopup();
+            }
+
+            loadPollingScheme(record);
+        }
+    };
+})();
+</script>

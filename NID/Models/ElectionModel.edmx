@@ -1,0 +1,395 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="EMISModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="field_metadata">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="table_name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="column_name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="display_label" Type="nvarchar" MaxLength="150" />
+          <Property Name="placeholder" Type="nvarchar" MaxLength="100" />
+          <Property Name="tooltip" Type="nvarchar" MaxLength="500" />
+          <Property Name="section_number" Type="int" />
+          <Property Name="section_name" Type="nvarchar" MaxLength="100" />
+          <Property Name="sort_order" Type="int" />
+          <Property Name="sql_type" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="input_type" Type="nvarchar" MaxLength="50" />
+          <Property Name="is_required" Type="bit" />
+          <Property Name="min_length" Type="int" />
+          <Property Name="max_length" Type="int" />
+          <Property Name="min_value" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="max_value" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="decimal_places" Type="int" />
+          <Property Name="regex_pattern" Type="nvarchar" MaxLength="500" />
+          <Property Name="is_readonly" Type="bit" />
+          <Property Name="is_computed" Type="bit" />
+          <Property Name="computed_expression" Type="nvarchar(max)" />
+          <Property Name="default_value" Type="nvarchar" MaxLength="255" />
+          <Property Name="default_expression" Type="nvarchar" MaxLength="255" />
+          <Property Name="is_foreign_key" Type="bit" />
+          <Property Name="dropdown_source_table" Type="nvarchar" MaxLength="100" />
+          <Property Name="dropdown_value_column" Type="nvarchar" MaxLength="100" />
+          <Property Name="dropdown_text_column" Type="nvarchar" MaxLength="100" />
+          <Property Name="dropdown_where" Type="nvarchar" MaxLength="500" />
+          <Property Name="dropdown_order_by" Type="nvarchar" MaxLength="200" />
+          <Property Name="dependent_on_column" Type="nvarchar" MaxLength="100" />
+          <Property Name="dependent_on_table" Type="nvarchar" MaxLength="100" />
+          <Property Name="is_multi_select" Type="bit" />
+          <Property Name="include_blank_option" Type="bit" />
+          <Property Name="custom_query" Type="nvarchar(max)" />
+          <Property Name="allow_insert" Type="bit" />
+          <Property Name="allow_update" Type="bit" />
+          <Property Name="show_in_list" Type="bit" />
+          <Property Name="is_searchable" Type="bit" />
+          <Property Name="is_sortable" Type="bit" />
+          <Property Name="exportable" Type="bit" />
+          <Property Name="importable" Type="bit" />
+          <Property Name="show_in_mobile" Type="bit" />
+          <Property Name="roles_visible" Type="nvarchar" MaxLength="500" />
+          <Property Name="roles_editable" Type="nvarchar" MaxLength="500" />
+          <Property Name="audit_log" Type="bit" />
+          <Property Name="created_by" Type="nvarchar" MaxLength="100" />
+          <Property Name="created_at" Type="datetime" />
+          <Property Name="updated_by" Type="nvarchar" MaxLength="100" />
+          <Property Name="updated_at" Type="datetime" />
+          <Property Name="is_deleted" Type="int" />
+        </EntityType>
+        <Function Name="get_candidate_votes" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="type" Type="varchar" Mode="In" />
+          <Parameter Name="year" Type="int" Mode="In" />
+          <Parameter Name="assembly" Type="varchar" Mode="In" />
+          <Parameter Name="constituency" Type="int" Mode="In" />
+        </Function>
+        <Function Name="get_constituency" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="assembly" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="get_polling_scheme" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="year" Type="int" Mode="In" />
+          <Parameter Name="election" Type="varchar" Mode="In" />
+          <Parameter Name="assembly" Type="varchar" Mode="In" />
+          <Parameter Name="seat" Type="varchar" Mode="In" />
+          <Parameter Name="sr" Type="int" Mode="In" />
+        </Function>
+        <Function Name="get_polling_stations" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="year" Type="int" Mode="In" />
+          <Parameter Name="election" Type="varchar" Mode="In" />
+          <Parameter Name="assembly" Type="varchar" Mode="In" />
+          <Parameter Name="seat" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="get_voters" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="dated" Type="date" Mode="In" />
+          <Parameter Name="assembly" Type="varchar" Mode="In" />
+          <Parameter Name="constituency" Type="int" Mode="In" />
+        </Function>
+        <EntityContainer Name="EMISModelStoreContainer">
+          <EntitySet Name="field_metadata" EntityType="Self.field_metadata" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="EMISModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="ElectionEntities" annotation:LazyLoadingEnabled="true" >
+          <FunctionImport Name="get_constituency" ReturnType="Collection(EMISModel.get_constituency_Result)">
+          <Parameter Name="assembly" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="get_voters" ReturnType="Collection(EMISModel.get_voters_Result)">
+            <Parameter Name="dated" Mode="In" Type="DateTime" />
+            <Parameter Name="assembly" Mode="In" Type="String" />
+            <Parameter Name="constituency" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="get_candidate_votes" ReturnType="Collection(EMISModel.get_candidate_votes_Result)">
+            <Parameter Name="type" Mode="In" Type="String" />
+            <Parameter Name="year" Mode="In" Type="Int32" />
+            <Parameter Name="assembly" Mode="In" Type="String" />
+            <Parameter Name="constituency" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <EntitySet Name="field_metadata" EntityType="EMISModel.field_metadata" />
+          <FunctionImport Name="get_polling_stations" ReturnType="Collection(EMISModel.get_polling_stations_Result)">
+            <Parameter Name="year" Mode="In" Type="Int32" />
+            <Parameter Name="election" Mode="In" Type="String" />
+            <Parameter Name="assembly" Mode="In" Type="String" />
+            <Parameter Name="seat" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="get_polling_scheme" ReturnType="Collection(EMISModel.get_polling_scheme_Result)">
+            <Parameter Name="year" Mode="In" Type="Int32" />
+            <Parameter Name="election" Mode="In" Type="String" />
+            <Parameter Name="assembly" Mode="In" Type="String" />
+            <Parameter Name="seat" Mode="In" Type="String" />
+            <Parameter Name="sr" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="get_constituency_Result">
+          <Property Type="Int32" Name="constituency" Nullable="true" />
+          <Property Type="String" Name="name" Nullable="true" MaxLength="255" />
+        </ComplexType>
+        <ComplexType Name="get_voters_Result">
+          <Property Type="String" Name="name" Nullable="true" MaxLength="255" />
+          <Property Type="Int32" Name="male" Nullable="true" />
+          <Property Type="Int32" Name="female" Nullable="true" />
+          <Property Type="Int32" Name="total" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="get_candidate_votes_Result">
+          <Property Type="String" Name="constituency" Nullable="false" MaxLength="23" />
+          <Property Type="String" Name="candidate" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="party" Nullable="true" MaxLength="255" />
+          <Property Type="Int32" Name="votes" Nullable="true" />
+        </ComplexType>
+        <EntityType Name="field_metadata">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="table_name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="column_name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="display_label" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="placeholder" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="tooltip" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="section_number" Type="Int32" />
+          <Property Name="section_name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="sort_order" Type="Int32" />
+          <Property Name="sql_type" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="input_type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="is_required" Type="Boolean" />
+          <Property Name="min_length" Type="Int32" />
+          <Property Name="max_length" Type="Int32" />
+          <Property Name="min_value" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="max_value" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="decimal_places" Type="Int32" />
+          <Property Name="regex_pattern" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="is_readonly" Type="Boolean" />
+          <Property Name="is_computed" Type="Boolean" />
+          <Property Name="computed_expression" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="default_value" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="default_expression" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="is_foreign_key" Type="Boolean" />
+          <Property Name="dropdown_source_table" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="dropdown_value_column" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="dropdown_text_column" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="dropdown_where" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="dropdown_order_by" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="dependent_on_column" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="dependent_on_table" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="is_multi_select" Type="Boolean" />
+          <Property Name="include_blank_option" Type="Boolean" />
+          <Property Name="custom_query" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="allow_insert" Type="Boolean" />
+          <Property Name="allow_update" Type="Boolean" />
+          <Property Name="show_in_list" Type="Boolean" />
+          <Property Name="is_searchable" Type="Boolean" />
+          <Property Name="is_sortable" Type="Boolean" />
+          <Property Name="exportable" Type="Boolean" />
+          <Property Name="importable" Type="Boolean" />
+          <Property Name="show_in_mobile" Type="Boolean" />
+          <Property Name="roles_visible" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="roles_editable" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="audit_log" Type="Boolean" />
+          <Property Name="created_by" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="created_at" Type="DateTime" Precision="3" />
+          <Property Name="updated_by" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="updated_at" Type="DateTime" Precision="3" />
+          <Property Name="is_deleted" Type="Int32" />
+        </EntityType>
+        <ComplexType Name="get_polling_stations_Result">
+          <Property Type="String" Name="Election" Nullable="false" MaxLength="20" />
+          <Property Type="Int32" Name="Year" Nullable="false" />
+          <Property Type="String" Name="Assembly" Nullable="false" MaxLength="12" />
+          <Property Type="String" Name="Seat" Nullable="false" MaxLength="5" />
+          <Property Type="String" Name="Tehsil" Nullable="true" MaxLength="255" />
+          <Property Type="Int32" Name="Sr" Nullable="true" />
+          <Property Type="String" Name="SType" Nullable="true" MaxLength="7" />
+          <Property Type="String" Name="Station" Nullable="true" MaxLength="255" />
+          <Property Type="Int32" Name="MVoter" Nullable="true" />
+          <Property Type="Int32" Name="FVoter" Nullable="true" />
+          <Property Type="Int32" Name="Voter" Nullable="true" />
+          <Property Type="Int32" Name="MBooth" Nullable="true" />
+          <Property Type="Int32" Name="FBooth" Nullable="true" />
+          <Property Type="Int32" Name="Booth" Nullable="true" />
+          <Property Type="String" Name="PollingStation" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="Category" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="District" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="Source" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="MatchedPlace" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="GeometryType" Nullable="true" MaxLength="255" />
+          <Property Type="Double" Name="Latitude" Nullable="true" />
+          <Property Type="Double" Name="Longitude" Nullable="true" />
+          <Property Type="Double" Name="OffsetMeters" Nullable="true" />
+          <Property Type="String" Name="Precision" Nullable="true" MaxLength="255" />
+        </ComplexType>
+        <ComplexType Name="get_polling_scheme_Result">
+          <Property Type="String" Name="Election" Nullable="false" MaxLength="20" />
+          <Property Type="Int32" Name="Year" Nullable="false" />
+          <Property Type="String" Name="Assembly" Nullable="false" MaxLength="12" />
+          <Property Type="String" Name="Seat" Nullable="false" MaxLength="5" />
+          <Property Type="Int32" Name="Sr" Nullable="true" />
+          <Property Type="String" Name="Area" Nullable="true" MaxLength="255" />
+          <Property Type="Double" Name="Bl" Nullable="true" />
+          <Property Type="Int32" Name="MVoter" Nullable="true" />
+          <Property Type="Int32" Name="FVoter" Nullable="true" />
+          <Property Type="Int32" Name="Voter" Nullable="true" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="EMISModelStoreContainer" CdmEntityContainer="ElectionEntities" >
+          <FunctionImportMapping FunctionImportName="get_constituency" FunctionName="EMISModel.Store.get_constituency">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EMISModel.get_constituency_Result">
+                <ScalarProperty Name="constituency" ColumnName="constituency" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="get_voters" FunctionName="EMISModel.Store.get_voters">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EMISModel.get_voters_Result">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="male" ColumnName="male" />
+                <ScalarProperty Name="female" ColumnName="female" />
+                <ScalarProperty Name="total" ColumnName="total" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="get_candidate_votes" FunctionName="EMISModel.Store.get_candidate_votes">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EMISModel.get_candidate_votes_Result">
+                <ScalarProperty Name="constituency" ColumnName="constituency" />
+                <ScalarProperty Name="candidate" ColumnName="candidate" />
+                <ScalarProperty Name="party" ColumnName="party" />
+                <ScalarProperty Name="votes" ColumnName="votes" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="field_metadata">
+            <EntityTypeMapping TypeName="EMISModel.field_metadata">
+              <MappingFragment StoreEntitySet="field_metadata">
+                <ScalarProperty Name="is_deleted" ColumnName="is_deleted" />
+                <ScalarProperty Name="updated_at" ColumnName="updated_at" />
+                <ScalarProperty Name="updated_by" ColumnName="updated_by" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+                <ScalarProperty Name="created_by" ColumnName="created_by" />
+                <ScalarProperty Name="audit_log" ColumnName="audit_log" />
+                <ScalarProperty Name="roles_editable" ColumnName="roles_editable" />
+                <ScalarProperty Name="roles_visible" ColumnName="roles_visible" />
+                <ScalarProperty Name="show_in_mobile" ColumnName="show_in_mobile" />
+                <ScalarProperty Name="importable" ColumnName="importable" />
+                <ScalarProperty Name="exportable" ColumnName="exportable" />
+                <ScalarProperty Name="is_sortable" ColumnName="is_sortable" />
+                <ScalarProperty Name="is_searchable" ColumnName="is_searchable" />
+                <ScalarProperty Name="show_in_list" ColumnName="show_in_list" />
+                <ScalarProperty Name="allow_update" ColumnName="allow_update" />
+                <ScalarProperty Name="allow_insert" ColumnName="allow_insert" />
+                <ScalarProperty Name="custom_query" ColumnName="custom_query" />
+                <ScalarProperty Name="include_blank_option" ColumnName="include_blank_option" />
+                <ScalarProperty Name="is_multi_select" ColumnName="is_multi_select" />
+                <ScalarProperty Name="dependent_on_table" ColumnName="dependent_on_table" />
+                <ScalarProperty Name="dependent_on_column" ColumnName="dependent_on_column" />
+                <ScalarProperty Name="dropdown_order_by" ColumnName="dropdown_order_by" />
+                <ScalarProperty Name="dropdown_where" ColumnName="dropdown_where" />
+                <ScalarProperty Name="dropdown_text_column" ColumnName="dropdown_text_column" />
+                <ScalarProperty Name="dropdown_value_column" ColumnName="dropdown_value_column" />
+                <ScalarProperty Name="dropdown_source_table" ColumnName="dropdown_source_table" />
+                <ScalarProperty Name="is_foreign_key" ColumnName="is_foreign_key" />
+                <ScalarProperty Name="default_expression" ColumnName="default_expression" />
+                <ScalarProperty Name="default_value" ColumnName="default_value" />
+                <ScalarProperty Name="computed_expression" ColumnName="computed_expression" />
+                <ScalarProperty Name="is_computed" ColumnName="is_computed" />
+                <ScalarProperty Name="is_readonly" ColumnName="is_readonly" />
+                <ScalarProperty Name="regex_pattern" ColumnName="regex_pattern" />
+                <ScalarProperty Name="decimal_places" ColumnName="decimal_places" />
+                <ScalarProperty Name="max_value" ColumnName="max_value" />
+                <ScalarProperty Name="min_value" ColumnName="min_value" />
+                <ScalarProperty Name="max_length" ColumnName="max_length" />
+                <ScalarProperty Name="min_length" ColumnName="min_length" />
+                <ScalarProperty Name="is_required" ColumnName="is_required" />
+                <ScalarProperty Name="input_type" ColumnName="input_type" />
+                <ScalarProperty Name="sql_type" ColumnName="sql_type" />
+                <ScalarProperty Name="sort_order" ColumnName="sort_order" />
+                <ScalarProperty Name="section_name" ColumnName="section_name" />
+                <ScalarProperty Name="section_number" ColumnName="section_number" />
+                <ScalarProperty Name="tooltip" ColumnName="tooltip" />
+                <ScalarProperty Name="placeholder" ColumnName="placeholder" />
+                <ScalarProperty Name="display_label" ColumnName="display_label" />
+                <ScalarProperty Name="column_name" ColumnName="column_name" />
+                <ScalarProperty Name="table_name" ColumnName="table_name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="get_polling_stations" FunctionName="EMISModel.Store.get_polling_stations">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EMISModel.get_polling_stations_Result">
+                <ScalarProperty Name="Election" ColumnName="Election" />
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="Assembly" ColumnName="Assembly" />
+                <ScalarProperty Name="Seat" ColumnName="Seat" />
+                <ScalarProperty Name="Tehsil" ColumnName="Tehsil" />
+                <ScalarProperty Name="Sr" ColumnName="Sr" />
+                <ScalarProperty Name="SType" ColumnName="SType" />
+                <ScalarProperty Name="Station" ColumnName="Station" />
+                <ScalarProperty Name="MVoter" ColumnName="MVoter" />
+                <ScalarProperty Name="FVoter" ColumnName="FVoter" />
+                <ScalarProperty Name="Voter" ColumnName="Voter" />
+                <ScalarProperty Name="MBooth" ColumnName="MBooth" />
+                <ScalarProperty Name="FBooth" ColumnName="FBooth" />
+                <ScalarProperty Name="Booth" ColumnName="Booth" />
+                <ScalarProperty Name="PollingStation" ColumnName="PollingStation" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="District" ColumnName="District" />
+                <ScalarProperty Name="Source" ColumnName="Source" />
+                <ScalarProperty Name="MatchedPlace" ColumnName="MatchedPlace" />
+                <ScalarProperty Name="GeometryType" ColumnName="GeometryType" />
+                <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+                <ScalarProperty Name="OffsetMeters" ColumnName="OffsetMeters" />
+                <ScalarProperty Name="Precision" ColumnName="Precision" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="get_polling_scheme" FunctionName="EMISModel.Store.get_polling_scheme">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EMISModel.get_polling_scheme_Result">
+                <ScalarProperty Name="Election" ColumnName="Election" />
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="Assembly" ColumnName="Assembly" />
+                <ScalarProperty Name="Seat" ColumnName="Seat" />
+                <ScalarProperty Name="Sr" ColumnName="Sr" />
+                <ScalarProperty Name="Area" ColumnName="Area" />
+                <ScalarProperty Name="Bl" ColumnName="Bl" />
+                <ScalarProperty Name="MVoter" ColumnName="MVoter" />
+                <ScalarProperty Name="FVoter" ColumnName="FVoter" />
+                <ScalarProperty Name="Voter" ColumnName="Voter" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

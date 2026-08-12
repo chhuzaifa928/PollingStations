@@ -1,0 +1,28 @@
+@model NID.Areas.ElectionTransport.Models.TransportPageViewModel
+@{ ViewBag.Title = "Election Transport Vehicles"; }
+@Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportAssets.cshtml")
+<div class="et-page">
+    @Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportNav.cshtml", Model)
+    @Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportMessages.cshtml")
+    <div class="et-shell et-toolbar">
+        <div class="et-field"><label>Search vehicle</label><input id="et-vehicle-search" class="et-input" placeholder="Registration, driver, mobile, provider or polling station" /></div>
+        <div class="et-field"><label>Status</label><select id="et-vehicle-status" class="et-select"><option value="">All statuses</option><option>Moving</option><option>Approaching</option><option>AtPollingStation</option><option>Idle</option><option>Offline</option><option>NeverActivated</option></select></div>
+        <div class="et-field"><label>Vehicle type</label><select id="et-vehicle-type" class="et-select"><option value="">All types</option></select></div>
+        <button id="et-vehicle-filter" class="et-btn primary" type="button">Search</button>
+        <button id="et-vehicle-clear" class="et-btn light" type="button">Clear</button>
+        <a class="et-btn navy" href="@Url.Action("ManageVehicle", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Add vehicle</a>
+    </div>
+    <div class="et-shell et-card"><div class="et-card-body"><div class="et-card-head"><div><h2>Registered and promised transport fleet</h2><div class="et-sub">Vehicle, driver, provider, assignment, live state and productivity.</div></div><span id="et-vehicle-count" class="et-badge blue">0 vehicles</span></div><div class="et-table-wrap"><table class="et-table"><thead><tr><th>Vehicle</th><th>Type</th><th>Driver</th><th>Provider</th><th>Polling station</th><th>Status</th><th class="right">Trips</th><th class="right">Distance</th><th>Actions</th></tr></thead><tbody id="et-vehicles-body"><tr><td colspan="9" class="et-empty">Loading vehicles…</td></tr></tbody></table></div></div></div>
+</div>
+@section scripts {
+    <script src="@Url.Content("~/Scripts/ElectionTransport/transport.core.js")"></script>
+    <script src="@Url.Content("~/Scripts/ElectionTransport/transport.lists.js")"></script>
+    <script>
+        ElectionTransport.Lists.vehicles({
+            contextId: @Model.ElectionContextId,
+            url: '@Url.Action("Vehicles", "TransportApi", new { area = "ElectionTransport" })',
+            detailsUrl: '@Url.Action("Vehicle", "CommandCentre", new { area = "ElectionTransport", id = "__id__" })',
+            editUrl: '@Url.Action("ManageVehicle", "CommandCentre", new { area = "ElectionTransport", contextId = "__context__", id = "__id__" })'
+        });
+    </script>
+}

@@ -1,0 +1,96 @@
+﻿@model List<NID.Models.GenericTableStats>
+@{
+    ViewBag.Title = "Super";
+}
+
+<h2>Create / Add New Table</h2>
+<a href="@Url.Action("Create", "Super",null)" class="btn btn-sm btn-success">Add Table</a>
+<hr />
+<h2>List of Tables</h2>
+<table class="table table-bordered table-striped">
+    <thead class="bg-primary">
+        <tr>
+            <th>Table Name</th>
+            <th>Table Description</th>
+            <th>Number of Columns</th>
+            <th>Number of Rows</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var table in Model)
+        {
+            <tr>
+                <td>@table.TableName</td>
+                <td>@table.TableDescription</td>
+                <td>@table.Columns</td>
+                <td>@table.Rows</td>
+                <td>
+                    <a href="@Url.Action("Table", "CRUD", new { table = table.TableName })" class="btn btn-sm btn-success">
+                        Data
+                    </a> |
+                    <a href="@Url.Action("Alter", "Super", new { table = table.TableName })" class="btn btn-sm btn-primary">
+                        Design
+                    </a> |
+                    <button class="btn btn-sm btn-danger droptable" data-id="@table.TableName">
+                        Drop
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@section scripts{
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // ----------------- INIT -----------------
+        $(document).ready(function () {
+            $(".droptable").on("click", function () {
+                // Get the table name from input or variable
+                var tableName = $(this).attr("data-id"); // assuming #table holds the table name
+
+                if (!tableName) {
+                    alert("Please select a table to drop.");
+                    return;
+                }
+
+                dropTable(tableName); // call the function we defined earlier
+            });
+
+            function dropTable(tableName) {
+                if (!tableName) {
+                    alert("Table name is required.");
+                    return;
+                }
+
+                // Confirm before dropping
+                if (!confirm(`Are you sure you want to drop table "${tableName}"? This will backup the table first.`)) {
+                    return;
+                }
+
+                $.ajax({
+                    url: '/Super/DropTable',
+                    type: 'POST',
+                    data: { table: tableName },
+                    success: function (response) {
+                        if (response.error) {
+                            alert(response.message || "Failed to drop table.");
+                            return;
+                        }
+
+                        // Success
+                        alert(response.message);
+
+                        // Optional: reload page or redirect to refresh table list
+                        location.reload();
+                    },
+                    error: function () {
+                        alert("Server error while dropping the table.");
+                    }
+                });
+            }
+
+        });
+    </script>
+}

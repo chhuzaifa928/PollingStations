@@ -1,0 +1,284 @@
+@model NID.Areas.ElectionTransport.Models.TransportDetailPageViewModel<NID.Areas.ElectionTransport.Models.VehicleDetailsDto>
+@{ ViewBag.Title = "Vehicle Details"; var v = Model.Data.Vehicle; }
+@Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportAssets.cshtml")
+<div class="et-page">
+    @Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportNav.cshtml", Model)
+    @Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportMessages.cshtml")
+    <div class="et-shell et-toolbar"><div class="et-field"><div class="et-name" style="font-size:18px">@v.RegistrationNo · @v.VehicleType</div><div class="et-sub">@v.Make @v.Model · @v.Color · @v.SeatingCapacity seats · Driver: @v.DriverName</div></div><a class="et-btn green-light" href="@Url.Action("ManageVehicle", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId, id = v.VehicleAssignmentId })">Edit vehicle</a><a class="et-btn light" href="@Url.Action("Vehicles", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Back to fleet</a></div>
+    <div class="et-grid">
+        <article class="et-card et-kpi"><div class="et-kpi-label">Current status</div><div class="et-kpi-value" style="font-size:20px">@v.EffectiveStatus</div><div class="et-kpi-foot">Last seen @((v.LastSeenAtUtc.HasValue) ? v.LastSeenAtUtc.Value.ToString("dd-MMM HH:mm:ss") + " UTC" : "never")</div></article>
+        <article class="et-card et-kpi blue"><div class="et-kpi-label">Trips today</div><div class="et-kpi-value">@v.TodayTrips</div><div class="et-kpi-foot">@Model.Data.ValidTrips validated across the record</div></article>
+        <article class="et-card et-kpi cyan"><div class="et-kpi-label">Distance today</div><div class="et-kpi-value">@v.TodayDistanceKm.ToString("N1")</div><div class="et-kpi-foot">Average trip @Model.Data.AverageTripKm.ToString("N1") km</div></article>
+        <article class="et-card et-kpi purple"><div class="et-kpi-label">Operational time</div><div class="et-kpi-value">@Model.Data.OperationalMinutes</div><div class="et-kpi-foot">Minutes between first and latest GPS points</div></article>
+        <article class="et-card et-span-8"><div class="et-card-body"><div class="et-card-head"><div><h2>Recent GPS trail</h2><div class="et-sub">Latest @Model.TrailMinutes minutes of reported positions.</div></div></div><div id="et-vehicle-detail-map" class="et-map"></div></div></article>
+        <article class="et-card et-span-4 et-vehicle-record">
+            <div class="et-card-body">
+
+                <div class="et-card-head et-record-head">
+                    <div>
+                        <div class="et-record-kicker">Live vehicle profile</div>
+                        <h2>Vehicle & Driver Record</h2>
+                    </div>
+
+                    <span class="et-record-status">
+                        @(string.IsNullOrWhiteSpace(v.EffectiveStatus)
+                    ? "Unknown"
+                    : v.EffectiveStatus)
+                    </span>
+                </div>
+
+                <div class="et-record-list">
+
+                    <div class="et-record-row">
+                        <div class="et-record-label">
+                            <i class="fa fa-user"></i>
+                            <span>Driver</span>
+                        </div>
+                        <div class="et-record-value">
+                            @(string.IsNullOrWhiteSpace(v.DriverName)
+                        ? "—"
+                        : v.DriverName)
+                        </div>
+                    </div>
+
+                    <div class="et-record-row">
+                        <div class="et-record-label">
+                            <i class="fa fa-phone"></i>
+                            <span>Mobile</span>
+                        </div>
+                        <div class="et-record-value">
+                            @(string.IsNullOrWhiteSpace(v.DriverMobile)
+                        ? "—"
+                        : v.DriverMobile)
+                        </div>
+                    </div>
+
+                    <div class="et-record-row">
+                        <div class="et-record-label">
+                            <i class="fa fa-map-marker"></i>
+                            <span>Address</span>
+                        </div>
+                        <div class="et-record-value">
+                            @(string.IsNullOrWhiteSpace(v.DriverAddress)
+                        ? "—"
+                        : v.DriverAddress)
+                        </div>
+                    </div>
+
+                    <div class="et-record-row">
+                        <div class="et-record-label">
+                            <i class="fa fa-handshake-o"></i>
+                            <span>Provider</span>
+                        </div>
+                        <div class="et-record-value">
+                            @(string.IsNullOrWhiteSpace(v.ProviderName)
+                        ? "—"
+                        : v.ProviderName)
+                        </div>
+                    </div>
+
+                    <div class="et-record-row">
+                        <div class="et-record-label">
+                            <i class="fa fa-building"></i>
+                            <span>Polling Station</span>
+                        </div>
+                        <div class="et-record-value">
+                            @(string.IsNullOrWhiteSpace(v.PollingStationName)
+                        ? "—"
+                        : v.PollingStationName)
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="et-record-metrics">
+
+                    <div class="et-record-metric">
+                        <div class="et-record-metric-icon">
+                            <i class="fa fa-tachometer"></i>
+                        </div>
+
+                        <div>
+                            <span>Current Speed</span>
+                            <strong>
+                                @(v.SpeedKph.HasValue
+                            ? v.SpeedKph.Value.ToString("N0")
+                            : "—")
+                            </strong>
+                            <small>km/h</small>
+                        </div>
+                    </div>
+
+                    <div class="et-record-metric">
+                        <div class="et-record-metric-icon">
+                            <i class="fa fa-location-arrow"></i>
+                        </div>
+
+                        <div>
+                            <span>Distance to Station</span>
+                            <strong>
+                                @(v.DistanceToStationMeters.HasValue
+                            ? v.DistanceToStationMeters.Value.ToString("N0")
+                            : "—")
+                            </strong>
+                            <small>metres</small>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </article>
+        <article class="et-card et-span-7"><div class="et-card-body"><div class="et-card-head"><div><h2>Recent trips</h2></div></div><div class="et-table-wrap"><table class="et-table"><thead><tr><th>Trip</th><th>Polling station</th><th>Arrival</th><th class="right">Distance</th><th class="right">Duration</th><th>Status</th></tr></thead><tbody>@foreach (var t in Model.Data.RecentTrips) { <tr><td>#@t.TripNumber</td><td>@t.PollingStationName</td><td>@(t.ArrivedAtUtc.HasValue ? t.ArrivedAtUtc.Value.ToString("dd-MMM HH:mm") : "—")</td><td class="right">@(t.DistanceKm.HasValue ? t.DistanceKm.Value.ToString("N2") : "—")</td><td class="right">@(t.DurationMinutes.HasValue ? t.DurationMinutes.Value.ToString("N1") : "—")</td><td>@t.ValidationStatus</td></tr> } @if (!Model.Data.RecentTrips.Any()) { <tr><td colspan="6" class="et-empty">No trips recorded.</td></tr> }</tbody></table></div></div></article>
+        <article class="et-card et-span-5"><div class="et-card-body"><div class="et-card-head"><div><h2>Assigned home requests</h2></div></div><div class="et-side-list">@foreach (var r in Model.Data.RecentRequests) { <div class="et-list-item"><div class="et-list-icon">🏠</div><div><div class="et-list-title">@r.RequestNo · @r.RequestedByName</div><div class="et-list-meta">@r.PickupArea · @r.PassengerCount passengers</div></div><span class="et-badge blue">@r.RequestStatus</span></div> } @if (!Model.Data.RecentRequests.Any()) { <div class="et-empty">No assigned requests.</div> }</div></div></article>
+    </div>
+</div>
+@section scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="@Url.Content("~/Scripts/ElectionTransport/transport.core.js")"></script>
+    <script src="@Url.Content("~/Scripts/ElectionTransport/transport.details.js")"></script>
+    <script>ElectionTransport.Details.vehicle({ assignmentId: @v.VehicleAssignmentId, trailMinutes: @Model.TrailMinutes, trailUrl: '@Url.Action("VehicleTrail", "TransportApi", new { area = "ElectionTransport" })' });</script>
+}
+<style>
+    /* Vehicle / Driver compact record */
+
+.et-vehicle-record {
+    border-top: 3px solid #0f6d58;
+    background: #fff;
+}
+
+.et-record-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.et-record-kicker {
+    margin-bottom: 3px;
+    color: #83918d;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+.et-record-head h2 {
+    margin: 0;
+}
+
+.et-record-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 9px;
+    color: #0f6d58;
+    background: #edf7f3;
+    border: 1px solid #d1e7df;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.et-record-list {
+    margin-top: 12px;
+    border-top: 1px solid #e9efed;
+}
+
+.et-record-row {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 2px;
+    border-bottom: 1px solid #edf2f0;
+}
+
+.et-record-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #667085;
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+.et-record-label i {
+    width: 17px;
+    color: #0f6d58;
+    text-align: center;
+    font-size: 12px;
+}
+
+.et-record-value {
+    overflow-wrap: anywhere;
+    color: #25364b;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: right;
+}
+
+.et-record-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 13px;
+}
+
+.et-record-metric {
+    display: grid;
+    grid-template-columns: 35px minmax(0, 1fr);
+    gap: 9px;
+    align-items: center;
+    padding: 10px;
+    background: #f7faf9;
+    border: 1px solid #e0eae7;
+    border-radius: 10px;
+}
+
+.et-record-metric-icon {
+    display: flex;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    color: #0f6d58;
+    background: #eaf5f1;
+    border-radius: 9px;
+}
+
+.et-record-metric span {
+    display: block;
+    color: #7b8794;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+}
+
+.et-record-metric strong {
+    display: inline-block;
+    margin-top: 3px;
+    color: #102b49;
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.et-record-metric small {
+    margin-left: 3px;
+    color: #667085;
+    font-size: 9px;
+}
+
+@@media (max-width: 700px) {
+    .et-record-row {
+        grid-template-columns: 105px minmax(0, 1fr);
+    }
+
+    .et-record-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

@@ -1,0 +1,380 @@
+﻿@{
+    Layout = "~/Views/Shared/_EconomicUnits.cshtml";
+    <link rel="stylesheet" href="~/Content/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+
+        .card {
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        .bg-c-green {
+            background: linear-gradient(90deg, #007f7f, #4caba0);
+        }
+
+        .order-card {
+            color: #fff;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, .125);
+            border-radius: .50rem;
+        }
+
+        .card-title {
+            font-size: 18px;
+        }
+
+        .card-val {
+            font-size: 18px;
+        }
+
+        .card-icon {
+            position: absolute;
+            right: 10px;
+            top: 15px;
+            font-size: 48px !important;
+            color: whitesmoke;
+        }
+
+        .c2 {
+            padding: 5px;
+        }
+
+        .party-flag {
+            height: 36px;
+            width: 36px;
+        }
+
+        #votesTable {
+            font-size: 14px;
+        }
+    </style>
+}
+
+
+<div class="row">
+
+    <div class="col-sm-2 c2">
+        <select id="type" class="form-control">
+            <option value="GE">General Election</option>
+            <option value="BY">By Election</option>
+        </select>
+    </div>
+    <div class="col-sm-1 c2">
+        <select id="year" class="form-control">
+            <option value="2024">2024</option>
+            <option value="2018">2018</option>
+            <option value="2013">2013</option>
+            <option value="2008">2008</option>
+        </select>
+    </div>
+    <div class="col-sm-3 c2">
+        <select id="assembly" class="form-control">
+            <option value="NA">National Assemebly</option>
+            <option value="PP">Punjab Assemebly</option>
+            <option value="PS">Sindh Assemebly</option>
+            <option value="PK">KPK Assemebly</option>
+            <option value="PB">Balochistan Assemebly</option>
+            <option value="AJK">AJK Assemebly</option>
+            <option value="GB">GB Assemebly</option>
+        </select>
+    </div>
+    <div class="col-sm-3 c2">
+        <select id="constituency" class="form-control">
+            <option value="0">--select--</option>
+        </select>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-3 rp">
+        <div class="card bg-c-green" style="position:relative;">
+            <div class="card-block" style="padding:5px;">
+                <h6 class="card-title">Total Voters</h6>
+                <p class="card-val"><span class="f-right" id="tvoters">#####</span></p>
+                <i class="fas fa-user card-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3 rp">
+        <div class="card bg-c-green" style="position:relative;">
+            <div class="card-block" style="padding:5px;">
+                <h6 class="card-title">Male Voters</h6>
+                <p class="card-val"><span class="f-right" id="mvoters">#####</span></p>
+                <i class="fas fa-user card-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3 rp">
+        <div class="card bg-c-green" style="position:relative;">
+            <div class="card-block" style="padding:5px;">
+                <h6 class="card-title">Female Voters</h6>
+                <p class="card-val"><span class="f-right" id="fvoters">#####</span></p>
+                <i class="fas fa-user card-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3 rp">
+        <div class="card bg-c-green" style="position:relative;">
+            <div class="card-block" style="padding:5px;">
+                <h6 class="card-title">Male% - Female % Voters</h6>
+                <p class="card-val"><span class="f-right" id="gap">#####</span></p>
+                <p><i class="fas fa-percentage card-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+
+    <div class="col-sm-12 c2">
+        <div id="map" style="height:600px;"></div>
+    </div>
+    
+</div>
+
+@section scripts{
+    <script src="~/script/js/jquery.dataTables.min.js"></script>
+    <script src="~/script/js/leaflet.js"></script>
+    <script src="~/script/js/Control.FullScreen.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            var map;
+            let fullGeoJsonData;   // Store the entire dataset
+            let currentLayer; 
+            getConstitency();
+
+            $("#assembly").on("change", function () {
+                getConstitency();
+                showPolygon1();
+            });
+            $("#year").on("change", function () {
+                getConstitency();
+                showPolygon1();
+            });
+            function getConstitency() {
+                var as = $("#assembly").val();
+                $.get("/Home/GetConstituency/?assembly=" + as, function (response) {
+                    if (response.data.length != 0) {
+                        var str = "<option value=0>--select--</option>";
+                        var data = response.data;
+                        $.each(data, function (index, i) {
+                            str = str + "<option value=" + i.constituency + ">" + i.name + "</option>";
+                        });
+                        $("#constituency").html(str);
+                    }
+                });
+                getVoters();
+
+            }
+
+            
+            $("#constituency").on("change", function () {
+                getVoters();
+                showPolygon1();
+            });
+
+            function getVoters() {
+                var as = $("#assembly").val();
+                var co = $("#constituency").val();
+                $.get("/Home/GetVoters/?assembly=" + as + "&constituency=" + co, function (response) {
+                    if (response.data.length != 0) {
+                        var data = response.data;
+                        if (data != null && data.length > 0) {
+                            $("#tvoters").html(data[0].total);
+                            var mp = (data[0].male * 100.0 / data[0].total).toFixed(2);
+                            var fp = (data[0].female * 100.0 / data[0].total).toFixed(2);
+                            $("#mvoters").html(data[0].male + " (" + mp + " %)");
+                            $("#fvoters").html(data[0].female + " (" + fp + " %)");
+                            $("#gap").html((mp - fp).toFixed(2));
+                        }
+                    }
+                });
+            }
+            function getCandidates() {
+                var ty = $("#type").val();
+                var yy = $("#year").val();
+                var as = $("#assembly").val();
+                var co = $("#constituency").val();
+                $.get("/Home/GetCandidates/?type=" + ty + "&year=" + yy + "&assembly=" + as + "&constituency=" + co, function (response) {
+                    if (response.data.length != 0) {
+                        var data = response.data;
+                        var total = data.reduce(function (sum, item) {
+                            return sum + (item.votes || 0);
+                        }, 0);
+                        str = "";
+                        if (data != null && data.length > 0) {
+                            $.each(data, function (index, i) {
+                                str = str + "<tr>";
+                                str = str + "<td>" + i.constituency + "</td>";
+                                str = str + "<td><img src='/Content/flag/" + i.party + ".png' alt='" + i.party + "' class='party-flag' onerror='this.style.visibility=\"hidden\";' /></td>";
+                                str = str + "<td>" + i.candidate + "</td>";
+                                str = str + "<td>" + i.party + "</td>";
+                                str = str + "<td>" + i.votes + "</td>";
+                                if (co == 0) {
+                                    str = str + "<td></td>";
+                                }
+                                else {
+                                    str = str + "<td>" + (i.votes * 100.0 / total).toFixed(2) + "</td>";
+                                }
+                                str = str + "</tr>";
+                            });
+                            $("#votesTable").html(str);
+
+                        }
+                    }
+                });
+            }
+
+            showPolygon1();
+            function showPolygon1() {
+                var assembly = $("#assembly").val();
+                var constituency = $("#constituency").val();
+                var a = "na";
+                if (assembly !== "NA") {
+                    a = "pa";
+                }
+
+                buildMap();
+
+                // Load appropriate GeoJSON
+                $.getJSON('/script/geojson/vil_narowal.geojson', function (geojsonData) {
+                    fullGeoJsonData = geojsonData;
+                    let matchedFeature;
+                    const selectedCode = assembly + "-" + constituency;
+                    if (a == "na") {
+                        matchedFeature = fullGeoJsonData.feature.find(f => f.properties.na_code == selectedCode);
+                    }
+                    else {
+                        matchedFeature = fullGeoJsonData.feature.find(f => f.properties.pa_code == selectedCode);
+                    }
+                    let filteredFeatures;
+                    if (!matchedFeature) {
+                        filteredFeatures = fullGeoJsonData.feature;
+                    }
+                    else {
+                        filteredFeatures = fullGeoJsonData.feature.filter(f =>
+                            f.properties.na_code == selectedCode || f.properties.pa_code == selectedCode
+                        );
+                    }
+                    
+                    
+
+                    builOverlay(filteredFeatures);
+                    map.fitBounds(currentLayer.getBounds());
+                });
+            }
+            function showPolygon2() {
+                var assembly = $("#assembly").val();
+                var constituency = $("#constituency").val();
+                if (constituency == 0) {
+                    showPolygon1();
+                    return;
+                }
+                var a = "na";
+                if (assembly !== "NA") {
+                    a = "pa";
+                }
+
+                buildMap();
+
+                // Find selected feature by 'code'
+                const selectedCode = assembly + "-" + constituency;
+                if (a == "na") {
+                    const matchedFeature = fullGeoJsonData.features.find(f => f.properties.na_code === selectedCode);
+                }
+                else {
+                    const matchedFeature = fullGeoJsonData.features.find(f => f.properties.pa_code === selectedCode);
+                }
+
+                let filteredFeatures;
+
+                if (!matchedFeature || selectedCode === "NA") {
+                    // Show all if no match or "NA" selected
+                    filteredFeatures = fullGeoJsonData.features;
+                } else {
+                    // Filter selected + children
+                    filteredFeatures = fullGeoJsonData.features.filter(f =>
+                        f.properties.code === selectedCode || f.properties.parentCode === selectedCode
+                    );
+                }
+
+                builOverlay(filteredFeatures);
+                map.fitBounds(currentLayer.getBounds());
+            }
+
+            function buildMap() {
+                if (map !== undefined) {
+                    map.remove();
+                }
+                var center = center;
+                var zoomLevel = 5;
+                googleMap = googleMap = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
+                var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' });
+                var osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France' });
+                var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
+                var esriSatellite = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, });
+                var baseMaps = {
+                    "OpenStreetMap": osm,
+                    "OpenStreetMap.HOT": osmHOT,
+                    "Google Satellite": googleMap,
+                    "Esri": esriSatellite,
+                };
+                var overlayMaps = {
+                };
+                map = L.map("map", { fullscreenControl: true, center: center, zoomControl: true, zoom: zoomLevel, layers: [googleStreets] });
+                var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+                layerControl.addTo(map);
+
+                map.invalidateSize();
+            }
+
+            function builOverlay(filteredFeatures) {
+                // Remove previous layer if any
+                if (currentLayer) {
+                    map.removeLayer(currentLayer);
+                }
+
+                // Create new layer with filtered features
+                currentLayer = L.geoJSON({
+                    type: "FeatureCollection",
+                    features: filteredFeatures
+                }, {
+                    style: {
+                        color: 'red',
+                        weight: 2,
+                        fillOpacity: 0.5
+                    },
+                    onEachFeature: function (feature, layer) {
+                        layer.on('mouseover', function () {
+                            const props = feature.properties;
+                            const content = Object.entries(props)
+                                .map(([k, v]) => `<b>${k}</b>: ${v}`).join('<br>');
+                            layer.bindTooltip(content, { sticky: true }).openTooltip();
+                        });
+
+                        layer.on('mouseout', function () {
+                            layer.closeTooltip();
+                        });
+                    }
+                }).addTo(map);
+            }
+
+
+
+
+
+
+        });
+
+    </script>
+
+}

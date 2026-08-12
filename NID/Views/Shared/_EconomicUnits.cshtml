@@ -1,0 +1,459 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="~/Content/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/Content/css/flag-icons.min.css">
+
+    <style>
+        .rp {
+            padding-left: 7px;
+            padding-right: 7px;
+        }
+
+        p {
+            margin-bottom: 0px;
+        }
+
+        .ntb, select {
+            border: none;
+            border-radius: 3px;
+            color: white;
+            background-color: #54aba0;
+            margin-right: 3px;
+            margin-top: 2px;
+            min-width: 32px;
+            height: 28px;
+        }
+
+        select {
+            margin-left: 2px;
+        }
+
+        option {
+            color: black;
+            background-color: white;
+        }
+
+        .chart {
+            height: 360px;
+            padding-top: 5px;
+        }
+
+        .highcharts-description {
+            margin: 0.3rem 10px;
+        }
+
+        .highcharts-title {
+            font-size: 16px !important;
+            font-weight: bold;
+        }
+
+        /* Chart subtitle */
+        .highcharts-subtitle {
+            font-size: 14px !important;
+            font-weight: normal;
+        }
+
+        .highcharts-axis-labels text, .highcharts-yaxis-title {
+            font-size: 12px !important;
+            font-weight: bold;
+            fill: #000;
+        }
+
+        .highcharts-legend-item text {
+            font-size: 12px !important;
+            font-weight: normal;
+        }
+
+        /* Legend title text */
+        .highcharts-legend-title {
+            font-size: 16px !important;
+            font-weight: bold;
+        }
+
+        .highcharts-tooltip {
+            font-size: 14px !important;
+            font-weight: bold !important;
+            color: #000 !important;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border: 1px solid #ccc !important;
+            border-radius: 6px !important;
+            padding: 5px 10px !important;
+            pointer-events: none; /* keep tooltip from interfering with mouse */
+            box-shadow: 0 0 5px rgba(0,0,0,0.1) !important;
+        }
+
+
+        .partition {
+            border-radius: 5px;
+            padding: 3px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            background-color: teal;
+        }
+
+        .capsule {
+            position: relative;
+            padding: 7px 12px;
+            opacity: 0.8;
+            border-radius: 7px;
+            margin-top: 15px;
+            background-color: teal;
+        }
+
+            .capsule span {
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+
+        .info.hover {
+            position: absolute;
+            right: 50px;
+            left: auto;
+            width: 150px;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+
+        .leaflet-right.leaflet-top {
+            right: 5px;
+            left: auto;
+        }
+
+        .legend {
+            text-align: left;
+            line-height: 18px;
+            color: #555;
+        }
+
+            .legend i {
+                width: 18px;
+                height: 18px;
+                float: left;
+                margin-right: 8px;
+                opacity: 0.7;
+            }
+
+        .top-curve {
+            border-radius: 10px 10px 0px 0px;
+            color: black;
+            font-weight: bold;
+        }
+
+        .bottom-curve {
+            border-radius: 0px 0px 10px 10px;
+        }
+
+        .tdhead {
+            border-top: none;
+            width: 34%;
+        }
+
+        .prvtbl {
+            font-size: 13px;
+        }
+
+            .prvtbl td {
+                padding: 5px !important;
+            }
+
+            .prvtbl tr > td:not(:nth-child(1)) {
+                text-align: center;
+            }
+
+            .prvtbl tr > td:nth-child(1) {
+                font-weight: bold;
+            }
+
+        #cdate, #pdate, #ldate {
+            font-size: 12px;
+            font-weight: bold;
+            color: blue;
+        }
+
+        td.td1 {
+            background-color: #fcb0fd;
+            color: black;
+            width: 22%;
+        }
+
+        td.td2 {
+            background-color: #adfdfd;
+            color: black;
+            width: 22%;
+        }
+
+        td.td3 {
+            background-color: #bdffbd;
+            color: black;
+            width: 22%;
+        }
+
+
+        @@media (min-width: 767px) {
+            .logo-area img, .lgo {
+                float: left;
+            }
+
+            .userbtn {
+                float: right;
+            }
+        }
+
+        @@media (max-width: 767px) {
+            .logo-area {
+                text-align: center;
+            }
+
+            .userbtn {
+                text-align: center;
+            }
+        }
+
+        .prvtbl td a {
+            font-size: 12px;
+        }
+
+        .chart {
+            background-color: white;
+        }
+
+        .ntb.active {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .partition button, .partition select {
+            margin-bottom: 5px;
+        }
+
+        .card {
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        .bg-c-blue {
+            background: linear-gradient(90deg, #007f7f, #4caba0);
+        }
+
+        .bg-c-green {
+            background: linear-gradient(90deg, #007f7f, #4caba0);
+        }
+
+        .order-card {
+            color: #fff;
+        }
+
+        .card {
+            color: white;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, .125);
+            border-radius: .50rem;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .card-val {
+            font-size: 18px;
+        }
+
+        .card-icon {
+            position: absolute;
+            right: 10px;
+            top: 15px;
+            font-size: 48px !important;
+            color: whitesmoke;
+        }
+        .fi{
+            font-size:20px;
+        }
+        .map-value {
+            font-size: 16px;
+        }
+    </style>
+    <link href="~/Content/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body style="background-color:#F6F8FA;">
+    <div class="container-fluid" style="background-color:teal; color:white; padding:5px;">
+            <div class="row">
+                <div class="col-md-6 col-sm-12 rp" style="margin-bottom:0px;">
+                    <div class="logo-area">
+                        <img src="~/Content/img/pak.png" style="height:45px; width:50px; margin-right:7px;">
+                        <div class="lgo">
+                            <p style="font-weight:bold; margin-bottom:0px; margin-top:4px; font-size:16px;">V.I.C.T.O.R.Y</p>
+                            <p style="margin-bottom:0px;">Voter Intelligence & Campaign Toolkit for Organized Results & Yield</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 rp" style="margin-bottom:0px;">
+                    <div class="userbtn">
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" style="height:45px; background-color:#048d8d; color:white;">
+                                Welcome! <b>Admin</b>
+                                <span class="glyphicon glyphicon-user" style="border-radius: 50%; width: 30px; height: 30px; background-color: teal; padding-top: 7px;"></span>
+                            </button>
+                            <ul class="dropdown-menu" style="min-width: 140px;">
+                                <li><a href="#">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 rp">
+                <nav class="navbar" style="margin-top:10px; margin-bottom:20px; background-color:white">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="/Home/Result">Home</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="myNavbar">
+                            <ul class="nav navbar-nav">
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        Constituency Profile
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="/">Geographic Profile</a></li>
+                                        <li><a href="/">Voters Profile </a></li>
+                                        <li><a href="/">Demographic Profile </a></li>
+                                        <li><a href="/">Housing Profile </a></li>
+                                        <li><a href="/">Economic Profile </a></li>
+                                        <li><a href="/">Agriculture Profile </a></li>
+                                        <li><a href="/">Diaspora Profile </a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        Compaign Toolkit
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="/">Party Structure</a></li>
+                                        <li><a href="/Home/Notable">Notables</a></li>
+                                        <li><a href="/">Volunteers</a></li>
+                                        <li><a href="/">Campaign Schedule</a></li>
+                                        <li><a href="/">Event</a></li>
+                                        <li><a href="/">Event Feedback</a></li>
+                                        <li><a href="/">Campaign Management</a></li>
+                                        <li><a href="/">Social Media Pages</a></li>
+                                        <li><a href="/">Training</a></li>
+                                        <li><a href="/">Budget Management</a></li>
+                                        <li><a href="/">Election Survey</a></li>
+                                        <li><a href="/">Broadcast SMS</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        Election Day
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="/Home/Polling">Polling Stations</a></li>
+                                        <li><a href="/">Polling Agents</a></li>
+                                        <li><a href="/">Voter List</a></li>
+                                        <li><a href="/">E-Parchi</a></li>
+                                        <li><a href="/">Transport Management</a></li>
+                                        <li><a href="/">Incident Reporting</a></li>
+                                        <li><a href="/">Visit Reporting</a></li>
+                                    </ul>
+                                </li>
+
+                                <li><a href="/Home/Result">Results</a></li>
+                                <li><a href="/Training/Index">Training</a></li>
+                                <li><a href="/Home/Forms">Forms</a></li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        Downloads
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#"></a>ECP Code of Conduct</li>
+                                        <li><a href="#"></a></li>
+                                    </ul>
+                                </li>
+
+
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li><a href="#"><span class="glyphicon glyphicon-user"></span> Register</a></li>
+                                <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <img src="~/Content/img/bannerecp.jpg" style="height:360px; width:100%" />
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb" style="margin-bottom:0px;">
+                            <li class="breadcrumb-item"><a href="/Migration">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">@ViewBag.Title</li>
+                        </ol>
+                    </nav>
+                </nav>
+                
+            </div>
+        </div>
+        <main>
+              @RenderBody()
+        </main>
+
+    </div>
+    <div style="padding:5px; background-color:teal; color:white; text-align:center; position:static; font-size:14px; font-weight:bold; bottom:0; width:100%;">
+        <p>Copyrights &copy; @DateTime.Now.Year</p>
+        <p>V.I.C.T.O.R.Y </p>
+    </div>
+    <script src="~/script/js/jquery-3.7.1.min.js"></script>
+    <script src="~/script/js/bootstrap.min.js"></script>
+    <script src="~/script/js/highmaps.js"></script>
+    <script src="~/script/js/data.js"></script>
+    <script src="~/script/js/exporting.js"></script>
+    <script src="~/script/js/offline-exporting.js"></script>
+    <script>
+        Highcharts.setOptions({
+            credits: {
+                enabled: true,
+                useHTML: true,
+                text: "<p style='color:black; font-size:10px;'>Credit: <a style='color:green; font-weight:bold; font-size:9px' href='http://www.pbs.gov.pk'>Pakistan Bureau of Statistics</a></p>",
+                position: {
+                    align: 'right',
+                    x: -10,
+                    verticalAlign: 'bottom',
+                    y: -5
+                },
+                style: {
+                    fontSize: '10px'
+                }
+            }
+        });
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+

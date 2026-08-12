@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="DiasporaModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <Function Name="get_government" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="agr1" Type="int" Mode="In" />
+          <Parameter Name="arg2" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="get_migration_skills" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="agr1" Type="int" Mode="In" />
+          <Parameter Name="arg2" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="get_remittance" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="level" Type="char" Mode="In" />
+          <Parameter Name="tyear" Type="char" Mode="In" />
+          <Parameter Name="from" Type="int" Mode="In" />
+          <Parameter Name="to" Type="int" Mode="In" />
+          <Parameter Name="arg2" Type="varchar" Mode="In" />
+        </Function>
+        <EntityContainer Name="DiasporaModelStoreContainer" />
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="DiasporaModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="DiasporaEntities" annotation:LazyLoadingEnabled="true">
+          <FunctionImport Name="get_migration_skills" ReturnType="Collection(DiasporaModel.get_migration_skills_Result)">
+            <Parameter Name="agr1" Mode="In" Type="Int32" />
+            <Parameter Name="arg2" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="get_government" ReturnType="Collection(DiasporaModel.get_government_Result)">
+            <Parameter Name="agr1" Mode="In" Type="Int32" />
+            <Parameter Name="arg2" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="get_remittance" ReturnType="Collection(DiasporaModel.get_remittance_Result)">
+            <Parameter Name="level" Mode="In" Type="String" />
+            <Parameter Name="tyear" Mode="In" Type="String" />
+            <Parameter Name="from" Mode="In" Type="Int32" />
+            <Parameter Name="to" Mode="In" Type="Int32" />
+            <Parameter Name="arg2" Mode="In" Type="String" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="get_migration_skills_Result">
+          <Property Type="Int32" Name="Year" Nullable="false" />
+          <Property Type="String" Name="Mode" Nullable="true" MaxLength="255" />
+          <Property Type="Int32" Name="HighlyQualified" Nullable="false" />
+          <Property Type="Int32" Name="HighlySkilled" Nullable="true" />
+          <Property Type="Int32" Name="Skilled" Nullable="true" />
+          <Property Type="Int32" Name="SemiSkilled" Nullable="true" />
+          <Property Type="Int32" Name="UnSkilled" Nullable="true" />
+          <Property Type="Int32" Name="Total" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="get_government_Result">
+          <Property Type="Int32" Name="StartYear" Nullable="true" />
+          <Property Type="Int32" Name="EndYear" Nullable="true" />
+          <Property Type="String" Name="Party" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="Color" Nullable="true" MaxLength="255" />
+        </ComplexType>
+        <ComplexType Name="get_remittance_Result">
+          <Property Type="DateTime" Name="dated" Nullable="true" />
+          <Property Type="Int32" Name="month" Nullable="true" />
+          <Property Type="Int32" Name="year" Nullable="true" />
+          <Property Type="Double" Name="min" Nullable="true" />
+          <Property Type="Double" Name="max" Nullable="true" />
+          <Property Type="Double" Name="avg" Nullable="true" />
+          <Property Type="Double" Name="value" Nullable="true" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="DiasporaModelStoreContainer" CdmEntityContainer="DiasporaEntities">
+          <FunctionImportMapping FunctionImportName="get_migration_skills" FunctionName="DiasporaModel.Store.get_migration_skills">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="DiasporaModel.get_migration_skills_Result">
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="Mode" ColumnName="Mode" />
+                <ScalarProperty Name="HighlyQualified" ColumnName="HighlyQualified" />
+                <ScalarProperty Name="HighlySkilled" ColumnName="HighlySkilled" />
+                <ScalarProperty Name="Skilled" ColumnName="Skilled" />
+                <ScalarProperty Name="SemiSkilled" ColumnName="SemiSkilled" />
+                <ScalarProperty Name="UnSkilled" ColumnName="UnSkilled" />
+                <ScalarProperty Name="Total" ColumnName="Total" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="get_government" FunctionName="DiasporaModel.Store.get_government">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="DiasporaModel.get_government_Result">
+                <ScalarProperty Name="StartYear" ColumnName="StartYear" />
+                <ScalarProperty Name="EndYear" ColumnName="EndYear" />
+                <ScalarProperty Name="Party" ColumnName="Party" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="get_remittance" FunctionName="DiasporaModel.Store.get_remittance">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="DiasporaModel.get_remittance_Result">
+                <ScalarProperty Name="dated" ColumnName="dated" />
+                <ScalarProperty Name="month" ColumnName="month" />
+                <ScalarProperty Name="year" ColumnName="year" />
+                <ScalarProperty Name="min" ColumnName="min" />
+                <ScalarProperty Name="max" ColumnName="max" />
+                <ScalarProperty Name="avg" ColumnName="avg" />
+                <ScalarProperty Name="value" ColumnName="value" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,60 @@
+@model NID.Areas.ElectionTransport.Models.VehicleManageViewModel
+@{
+    ViewBag.Title = Model.VehicleAssignmentId.HasValue ? "Edit Transport Vehicle" : "Add Transport Vehicle";
+    var context = ViewBag.Context as NID.Areas.ElectionTransport.Models.ElectionContextDto;
+}
+@Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportAssets.cshtml")
+<div class="et-page">
+    <div class="et-public-header">
+        <h1>@ViewBag.Title</h1>
+        <p>@(context == null ? "Election transport registration" : context.DisplayText) · Register the vehicle, driver, provider and polling-station assignment in one transaction.</p>
+    </div>
+    <div class="et-card et-form-card">
+        @using (Html.BeginForm("ManageVehicle", "CommandCentre", new { area = "ElectionTransport" }, FormMethod.Post, new { autocomplete = "off" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(x => x.VehicleAssignmentId)
+            @Html.HiddenFor(x => x.ElectionContextId)
+            <div class="et-form-section">
+                @Html.ValidationSummary(false)
+                <h3>Vehicle identification</h3>
+                <div class="et-form-grid">
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.VehicleTypeId)@Html.DropDownListFor(x => x.VehicleTypeId, Model.VehicleTypes, "Select type", new { @class = "et-select" })@Html.ValidationMessageFor(x => x.VehicleTypeId, null, new { @class = "et-validation" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.RegistrationNo)@Html.TextBoxFor(x => x.RegistrationNo, new { @class = "et-input", placeholder = "LEA-1234" })@Html.ValidationMessageFor(x => x.RegistrationNo, null, new { @class = "et-validation" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.DisplayName)@Html.TextBoxFor(x => x.DisplayName, new { @class = "et-input", placeholder = "Provider A Car 01" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.Color)@Html.TextBoxFor(x => x.Color, new { @class = "et-input" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.Make)@Html.TextBoxFor(x => x.Make, new { @class = "et-input", placeholder = "Toyota" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.Model)@Html.TextBoxFor(x => x.Model, new { @class = "et-input", placeholder = "Corolla" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.ModelYear)@Html.TextBoxFor(x => x.ModelYear, new { @class = "et-input", type = "number" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.SeatingCapacity)@Html.TextBoxFor(x => x.SeatingCapacity, new { @class = "et-input", type = "number" })</div>
+                    <div class="et-form-group et-col-6">@Html.LabelFor(x => x.OwnerName)@Html.TextBoxFor(x => x.OwnerName, new { @class = "et-input" })</div>
+                    <div class="et-form-group et-col-6">@Html.LabelFor(x => x.OwnerMobile)@Html.TextBoxFor(x => x.OwnerMobile, new { @class = "et-input" })</div>
+                </div>
+            </div>
+            <div class="et-form-section">
+                <h3>Driver and contact</h3>
+                <div class="et-form-grid">
+                    <div class="et-form-group et-col-4">@Html.LabelFor(x => x.DriverName)@Html.TextBoxFor(x => x.DriverName, new { @class = "et-input" })@Html.ValidationMessageFor(x => x.DriverName, null, new { @class = "et-validation" })</div>
+                    <div class="et-form-group et-col-4">@Html.LabelFor(x => x.DriverMobile)@Html.TextBoxFor(x => x.DriverMobile, new { @class = "et-input" })@Html.ValidationMessageFor(x => x.DriverMobile, null, new { @class = "et-validation" })</div>
+                    <div class="et-form-group et-col-4">@Html.LabelFor(x => x.DrivingLicenseNo)@Html.TextBoxFor(x => x.DrivingLicenseNo, new { @class = "et-input" })</div>
+                    <div class="et-form-group et-col-12">@Html.LabelFor(x => x.DriverAddress)@Html.TextAreaFor(x => x.DriverAddress, new { @class = "et-textarea", rows = 2 })</div>
+                </div>
+            </div>
+            <div class="et-form-section">
+                <h3>Election-day assignment</h3>
+                <div class="et-form-grid">
+                    <div class="et-form-group et-col-4">@Html.LabelFor(x => x.ProviderId)@Html.DropDownListFor(x => x.ProviderId, Model.Providers, "Not linked", new { @class = "et-select" })</div>
+                    <div class="et-form-group et-col-4">@Html.LabelFor(x => x.CandidateId)@Html.DropDownListFor(x => x.CandidateId, Model.Candidates, "Not linked", new { @class = "et-select" })</div>
+                    <div class="et-form-group et-col-4">@Html.LabelFor(x => x.PartyId)@Html.DropDownListFor(x => x.PartyId, Model.Parties, "Not linked", new { @class = "et-select" })</div>
+                    <div class="et-form-group et-col-6">@Html.LabelFor(x => x.AssignedPollingStationId)@Html.DropDownListFor(x => x.AssignedPollingStationId, Model.PollingStations, "Select polling station", new { @class = "et-select" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.AssignmentStatus)@Html.DropDownListFor(x => x.AssignmentStatus, new[] { new SelectListItem { Value = "Promised", Text = "Promised" }, new SelectListItem { Value = "Registered", Text = "Registered" }, new SelectListItem { Value = "Ready", Text = "Ready" }, new SelectListItem { Value = "Operational", Text = "Operational" }, new SelectListItem { Value = "Completed", Text = "Completed" }, new SelectListItem { Value = "Suspended", Text = "Suspended" } }, new { @class = "et-select" })</div>
+                    <div class="et-form-group et-col-3">@Html.LabelFor(x => x.MaxServiceRadiusKm)@Html.TextBoxFor(x => x.MaxServiceRadiusKm, new { @class = "et-input", type = "number", step = ".1" })</div>
+                    <div class="et-form-group et-col-12">@Html.LabelFor(x => x.Remarks)@Html.TextAreaFor(x => x.Remarks, new { @class = "et-textarea", rows = 3 })</div>
+                    <div class="et-form-group et-col-12"><label class="et-checkbox">@Html.CheckBoxFor(x => x.IsActive) Active vehicle assignment</label></div>
+                </div>
+            </div>
+            <div class="et-form-actions"><a class="et-btn light" href="@Url.Action("Vehicles", "CommandCentre", new { area = "ElectionTransport", contextId = Model.ElectionContextId })">Cancel</a><button type="submit" class="et-btn primary">Save vehicle and assignment</button></div>
+        }
+    </div>
+</div>
+@section scripts { <script src="@Url.Content("~/Scripts/ElectionTransport/transport.core.js")"></script> }

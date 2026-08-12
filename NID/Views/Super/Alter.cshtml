@@ -1,0 +1,404 @@
+﻿@{
+    Layout = null;
+    <link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        .mb-2:has(.min_length),
+        .mb-2:has(.max_length),
+        .mb-2:has(.decimal_places),
+        .mb-2:has(.dropdown_source_table),
+        .mb-2:has(.dropdown_value_column),
+        .mb-2:has(.dropdown_text_column),
+        .mb-2:has(.dropdown_where),
+        .mb-2:has(.dropdown_order) {
+            display: none;
+        }
+        .card {
+            margin-bottom: 15px;
+        }
+
+        .column-row {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+
+        .column-row .form-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
+}
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-sm-6">
+            <h3>Rename Table</h3>
+            <select id="existingTable" class="form-control" style="display:none;">
+                <option value="">-- Select Table --</option>
+            </select>
+        </div>
+    </div>
+
+
+
+    <!-- Table Name -->
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <input type="hidden" id="oldtable" name="oldtable" />
+            <input type="text" id="table" name="table" class="form-control" placeholder="Enter Table Name" />
+        </div>
+        <div class="col-sm-2">
+            <button class="btn btn-success" id="renameTable">Rename Table</button>
+</div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <h3>Modify Structure of Existing Table</h3>
+        </div>
+    </div>
+
+    <!-- Columns container -->
+    <div id="columns-container" class="mb-3"></div>
+
+    <!-- Buttons -->
+    <div class="mb-5">
+        <button type="button" id="add-column" class="btn btn-success me-2">
+            <i class="bi bi-plus-circle"></i> Add Column
+        </button>
+        <button type="button" id="save-table" class="btn btn-primary">
+            <i class="bi bi-save"></i> Save Table
+        </button>
+    </div>
+</div>
+
+<!-- Column Template JS -->
+<script src="~/script/jquery-3.4.1.min.js"></script>
+<script src="~/script/data/field_metadata.js"></script>
+<script>
+    $(document).ready(function () {
+        let columnCount = 0;
+        getExistingTables();
+
+        function getExistingTables() {
+            var tbl = $("#existingTable");
+            tbl.empty().append('<option value="">-- Select Table --</option>');
+            $.ajax({
+                url: "/Metadata/GetAllTables",
+                type: "GET",
+                success: function (response) {
+                    if (!response.error) {
+                        inputConfig.field_metadata.dropdown_source_table.options = response.data;
+                        tbl.append(generateOptions(inputConfig.field_metadata.dropdown_source_table.options, ""));
+                        performLoading();
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert("Failed to load tables");
+                }
+            });
+        }
+        function renderColumnRow(idx, data = {}) {
+            let html = `<div class="card mb-3 column-row p-3" data-idx="${idx}">`;
+
+            html += `<div class="row">`;
+
+            // ----- First column: essential info -----
+            html += `<div class="col-sm-4 col-md-3 col-lg-2">`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Column Name</label><input type="text" class="form-control" name="column_name_${idx}" value="${data.column_name ?? ''}" placeholder="Column Name"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">SQL Type</label><select class="form-control sql_type" name="sql_type_${idx}">${generateOptions(inputConfig.field_metadata.sql_type.options, data.sql_type)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Max Length</label><input type="number" class="form-control max_length" name="max_length_${idx}" value="${data.max_length ?? ''}" placeholder="Max Length"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Decimal Places</label><input type="number" class="form-control decimal_places" name="decimal_places_${idx}" value="${data.decimal_places ?? ''}" placeholder="decimal places"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Mandatory</label><select class="form-control" name="is_required_${idx}">${generateOptions(inputConfig.field_metadata.is_required.options, data.is_required)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Default Value</label><input type="text" class="form-control" name="default_value_${idx}" value="${data.default_value ?? ''}" placeholder="Default Value"></div>`;
+            html += `</div>`;
+
+            // ----- Second column: UI Design -----
+            html += `<div class="col-sm-4 col-md-3 col-lg-2">`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">UI Input Type</label><select class="form-control" name="input_type_${idx}">${generateOptions(inputConfig.field_metadata.input_type.options, data.input_type)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Label / Display Name</label><input type="text" class="form-control" name="display_label_${idx}" value="${data.display_label ?? ''}" placeholder="Label / Heading"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Placeholder</label><input type="text" class="form-control" name="placeholder_${idx}" value="${data.placeholder ?? ''}" placeholder="placeholder"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Tooltip Text</label><input type="text" class="form-control" name="tooltip_${idx}" value="${data.tooltip ?? ''}" placeholder="tooltip"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Section Number</label><input type="number" class="form-control" name="section_number_${idx}" value="${data.section_number ?? ''}" placeholder="Section Number"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Section Name</label><input type="text" class="form-control" name="section_name_${idx}" value="${data.section_name ?? ''}" placeholder="Section Name"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Sort Order (within Section)</label><input type="number" class="form-control" name="sort_order_${idx}" value="${data.sort_order ?? ''}" placeholder="Order within Section"></div>`;
+            html += `</div>`;
+
+            // ----- foreign key column -----
+            html += `<div class="col-sm-4 col-md-3 col-lg-2">`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Foreign Key?</label><select class="form-control is_foreign_key" name="is_foreign_key_${idx}">${generateOptions(inputConfig.field_metadata.is_foreign_key.options, data.is_foreign_key)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Dropdown Source Table</label><select class="form-control dropdown_source_table" name="dropdown_source_table_${idx}">${generateOptions(inputConfig.field_metadata.dropdown_source_table.options, data.dropdown_source_table)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Source Column (Value)?</label><select class="form-control dropdown_value_column" name="dropdown_value_column_${idx}" data-id="${data.dropdown_value_column}"></select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Source Column (Text)?</label><select class="form-control dropdown_text_column" name="dropdown_text_column_${idx}"  data-id="${data.dropdown_text_column}"></select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Where Calause (Filter)</label><input type="text" class="form-control dropdown_where" name="dropdown_where_${idx}" value="${data.dropdown_where ?? ''}" placeholder="Where Clause"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Order By Clause</label><input type="text" class="form-control dropdown_order" name="dropdown_order_by_${idx}" value="${data.dropdown_order_by ?? ''}" placeholder="Order by Clause"></div>`;
+
+            html += `</div>`;
+
+            // ----- flags column -----
+            html += `<div class="col-sm-4 col-md-3 col-lg-2">`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Readonly?</label><select class="form-control" name="is_readonly_${idx}">${generateOptions(inputConfig.field_metadata.is_readonly.options, data.is_readonly)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Allow Insert?</label><select class="form-control" name="allow_insert_${idx}">${generateOptions(inputConfig.field_metadata.allow_insert.options, data.allow_insert)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Allow Update?</label><select class="form-control" name="allow_update_${idx}">${generateOptions(inputConfig.field_metadata.allow_update.options, data.allow_update)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Show in List (Table)?</label><select class="form-control" name="show_in_list_${idx}">${generateOptions(inputConfig.field_metadata.show_in_list.options, data.show_in_list)}</select></div>`;
+            html += `</div>`;
+            // ----- filters -----
+            html += `<div class="col-sm-4 col-md-3 col-lg-2">`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Computed Column?</label><select class="form-control" name="is_computed_${idx}">${generateOptions(inputConfig.field_metadata.is_computed.options, data.is_computed)}</select></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Min Length</label><input type="number" class="form-control min_length" name="min_length_${idx}" value="${data.min_length ?? ''}" placeholder="Min Length"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Min Value</label><input type="number" class="form-control min_value" name="min_value_${idx}" value="${data.min_value ?? ''}" placeholder="Min Value"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">Max Value</label><input type="number" class="form-control max_value" name="max_value_${idx}" value="${data.max_value ?? ''}" placeholder="Max Value"></div>`;
+            html += `<div class="mb-2"><label class="form-label fw-bold">isDeleted?</label><select class="form-control" name="is_deleted_${idx}">${generateOptions(inputConfig.field_metadata.is_deleted.options, data.is_deleted)}</select></div>`;
+
+            html += `</div>`;
+
+            html += `</div>`;
+            html += `<div class='row'><div class="col-sm-4 col-md-3 col-lg-2"><button type="button" class="btn btn-danger remove-column" title="Remove Column">
+                <i class="bi bi-x-circle"></i>
+            </button></div></div>`;
+            html += `</div>`;
+            return html;
+        }
+
+        $(document).on("change", ".sql_type", function () {
+            var me = $(this).val();
+            const row = $(this).closest(".row");
+
+            const min = row.find(".min_length");
+            const max = row.find(".max_length");
+            const dec = row.find(".decimal_places");
+
+            hideThese([min, max, dec]);
+            if (me.includes("text") || me.includes("char")) {
+                showThese([min, max]);
+            }
+
+            if (me.includes("float") || me.includes("double")) {
+                showThese([dec]);
+            }
+        });
+
+        $(document).on("change", ".is_foreign_key", function () {
+            var me = $(this).val();
+            var normalized = (me || "").toString().trim().toLowerCase();
+
+            const row = $(this).closest(".row");
+
+            const tbl = row.find(".dropdown_source_table");
+            const val = row.find(".dropdown_value_column");
+            const txt = row.find(".dropdown_text_column");
+            const where = row.find(".dropdown_where");
+            const order = row.find(".dropdown_order");
+
+
+            if (normalized === "0" || normalized === "false") {
+                hideThese([tbl, val, txt, where, order]);
+
+                // reset values
+                row.find(".dropdown_source_table, .dropdown_value_column, .dropdown_text_column").empty();
+                row.find(".dropdown_where, .dropdown_order").val("");
+
+                return;
+            }
+            else {
+                showThese([tbl, val, txt, where, order]);
+            }
+
+            if (tbl.html()=="") {
+                tbl.html(generateOptions(inputConfig.field_metadata.dropdown_source_table.options, ""));
+            }
+
+
+        });
+
+        $(document).on("change", ".dropdown_source_table", function () {
+
+            const tableName = $(this).val();
+            if (!tableName) return;
+
+            // Scope to the current column card / row
+            const row = $(this).closest(".column-row");
+
+            const val = row.find(".dropdown_value_column");
+            const txt = row.find(".dropdown_text_column");
+
+            // Reset dropdowns
+            val.empty().append('<option value="">-- Select Value Column --</option>');
+            txt.empty().append('<option value="">-- Select Text Column --</option>');
+
+            // Load columns for selected table
+            $.ajax({
+                url: "/Metadata/GetTableColumns",
+                type: "GET",
+                data: { table: tableName }, // ✅ pass table name
+                success: function (response) {
+                    if (!response.error) {
+                        val.append(generateOptions(response.data, val.attr("data-id")));
+                        txt.append(generateOptions(response.data, txt.attr("data-id")));
+                        showThese([val, txt]);
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert("Failed to load table columns");
+                }
+            });
+
+        });
+
+
+
+        function performLoading() {
+    $.ajax({
+        url: "/Metadata/Get",
+        type: "GET",
+        data: { table: '@ViewBag.table' },
+        success: function (response) {
+
+            if (response.error) {
+                alert(response.message || "Failed to load table metadata");
+                return;
+            }
+
+            $("#table").val('@ViewBag.table');
+            $("#oldtable").val('@ViewBag.table');
+
+            // Clear existing columns
+            $("#columns-container").empty();
+            columnCount = 0;
+
+            // Render columns from metadata
+            $.each(response.data, function (_, col) {
+                const idx = columnCount;
+                const $row = $(renderColumnRow(idx, col));
+
+                $("#columns-container").append($row);
+                columnCount++;
+            });
+
+            $(".sql_type").trigger("change");
+            $(".is_foreign_key").trigger("change");
+            $(".dropdown_source_table").trigger("change");
+        },
+        error: function () {
+            alert("Server error while loading table metadata");
+        }
+    });
+}
+
+
+
+
+        function showThese(arr) {
+            arr.forEach(function (item, index) {
+                item.closest(".mb-2").show()
+            });
+        }
+
+        function hideThese(arr) {
+            arr.forEach(function (item, index) {
+                item.closest(".mb-2").hide()
+            });
+        }
+
+        // Helper to generate <option> HTML
+        function generateOptions(options, selectedValue) {
+
+            // ensure options is always an array
+            options = Array.isArray(options) ? options : [];
+
+            // normalize selectedValue
+            selectedValue = String(selectedValue ?? "").trim();
+
+            return options.map(o => {
+                const value = typeof o === "object" ? String(o.value).trim() : String(o).trim();
+                const text = typeof o === "object" ? o.text : o;
+                const selected = value === selectedValue ? "selected" : "";
+                return `<option value="${value}" ${selected}>${text}</option>`;
+            }).join('');
+        }
+
+
+
+
+        // Add new column
+        $("#add-column").click(function () {
+            $("#columns-container").append(renderColumnRow(columnCount++));
+        });
+
+        // Remove column
+        $(document).on("click", ".remove-column", function () {
+            $(this).closest(".column-row").remove();
+        });
+
+        // Save table
+        $("#save-table").click(function () {
+            const tableName = $("#newTableName").val().trim();
+            if (!tableName) { alert("Enter table name"); return; }
+
+            let columns = [];
+            $("#columns-container .column-row").each(function () {
+                const idx = $(this).data("idx");
+                let col = {};
+                for (let field in inputConfig.field_metadata) {
+                    col[field] = $(`[name='${field}_${idx}']`).val();
+                }
+                columns.push(col);
+            });
+
+            if (!columns.length) { alert("Add at least one column"); return; }
+
+            $.ajax({
+                url: "/Super/CreateTable",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ tableName, columns }),
+                success: function (res) {
+                    alert("Table saved successfully!");
+                    $("#newTableName").val("");
+                    $("#columns-container").empty();
+                    columnCount = 0;
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.responseText);
+                }
+            });
+        });
+
+        // Rename table
+        $('#renameTable').on('click', function (e) {
+
+            var oldtable = $('#oldtable').val();
+            var table = $('#table').val();
+
+            $.ajax({
+                url: '/Super/RenameTable',
+                type: 'POST',
+                data: {
+                    oldtable: oldtable,
+                    table: table
+                },
+                success: function (response) {
+                    alert(response.message);
+                    if (!response.error) {
+                        window.location.href = '/Super/Alter?table=' + table;
+                    }
+                },
+                error: function () {
+                    alert('Error while renaming table.');
+                }
+            });
+        });
+    });
+
+
+
+</script>
+

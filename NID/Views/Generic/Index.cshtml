@@ -1,0 +1,517 @@
+﻿@{
+    Layout = "~/Views/Shared/_EconomicUnits.cshtml";
+}
+
+<input type="hidden" id="tableName" value="@Model" />
+
+<div id="crud-container" style="background-color: white;"></div>
+<script src="~/script/jquery-3.4.1.min.js"></script>
+<script>
+    const inputConfig = {
+        election: {
+            dated: {
+                type: "date",
+            }
+        },
+        vehicle: {
+            provider_cnic: {
+                maxlength: 15,
+                type: "text",
+                placeholder: "XXXX-XXXXXXX-X"
+            },
+            provider_name: {
+                maxlength: 100,
+                type: "text",
+                placeholder: "Vehicle Owner / Provider"
+            },
+            provider_contact: {
+                maxlength: 11,
+                type: "text",
+                placeholder: "03XXXXXXXXX"
+            },
+            other: {
+                maxlength: 500,
+                type: "text",
+                placeholder: "Other SM Account Link"
+            },
+            rent: {
+                type: "number",
+                placeholder: "Rent / Day if any"
+            },
+            make: {
+                maxlength: 100,
+                type: "text",
+                placeholder: "like Suzuki"
+            },
+            model: {
+                maxlength: 100,
+                type: "text",
+                placeholder: "like Alto"
+            },
+            ac: {
+                type: "select",
+                options: [
+                    { value: 0, text: "No" },
+                    { value: 1, text: "Yes" }
+                ]
+            },
+            is_active: {
+                type: "select",
+                options: [
+                    { value: 0, text: "No" },
+                    { value: 1, text: "Yes" }
+                ]
+            },
+            vehicle_type: {
+                type: "select",
+                options: [
+                    { value: "0", text: "Select Type" },
+                    "Car", "Carry", "Jeep", "Van", "Coaster",
+                    "Bus","Pickup","Rickshaw","Motorcycle", "Other"
+                ]
+
+            },
+            color: {
+                type: "select",
+                options: [
+                    { value: "0", text: "Select Color" },
+                    "White", "Black", "Silver", "Grey",
+                    "Blue", "Red", "Green", "Yellow",
+                    "Brown", "Beige", "Gold", "Orange",
+                    "Purple", "Other"
+                ]
+
+            },
+            year: {
+                type: "select",
+                options: [
+                    { value: "0", text: "Select Year" },
+                    { value: "1", text: "Don't Know" },
+                    "2025", "2024", "2023", "2022", "2021", "2020",
+                    "2019","2018","2017","2016","2015","2014",,
+                    "2013","2012","2011", "2010",
+                    "2009", "2008", "2007", "2006", "2005", "2004",
+                    "2003","2002","2001","2000",
+                    "1999", "1998", "1997", "1996", "1995", "1994",
+                    "1993","1992","1991","1990",
+                ]
+            },
+        },
+        notables: {
+            cnic: {
+                maxlength: 15,
+                type: "text",
+                placeholder:"XXXX-XXXXXXX-X"
+            },
+            tribe: {
+                maxlength: 100,
+                type: "text",
+                placeholder:"tribe / clan / brardri"
+            },
+            mobile: {
+                maxlength: 11,
+                type: "text",
+                placeholder:"03XXXXXXXXX"
+            },
+            other: {
+                maxlength: 500,
+                type: "text",
+                placeholder:"Other SM Account Link"
+            },
+            
+            is_deleted: {
+                type: "select",
+                options: [
+                    { value: 0, text: "No" },
+                    { value: 1, text: "Yes" }
+                ]
+            }
+        },
+        agent: {
+            cnic: {
+                maxlength: 15,
+                type: "text",
+                placeholder: "XXXX-XXXXXXX-X"
+            },
+            tribe: {
+                maxlength: 100,
+                type: "text",
+                placeholder: "tribe / clan / brardri"
+            },
+            mobile: {
+                maxlength: 11,
+                type: "text",
+                placeholder: "03XXXXXXXXX"
+            },
+            other: {
+                maxlength: 500,
+                type: "text",
+                placeholder: "Other SM Account Link"
+            },
+            is_deleted: {
+                type: "select",
+                options: [
+                    { value: 0, text: "No" },
+                    { value: 1, text: "Yes" }
+                ]
+            },
+            gender: {
+                type: "select",
+                options: [
+                    { text: "Male" },
+                    { text: "Female" },
+                    { text: "Transgender" }
+                ]
+            },
+            education: {
+                type: "select",
+                options: [
+                    { text: "Select Education" },
+                    { text: "Primary" },
+                    { text: "Middle" },
+                    { text: "Matric" },
+                    { text: "Intermediate" },
+                    { text: "Graduate" },
+                    { text: "Master" },
+                    { text: "MS / M.Phill" },
+                    { text: "PHD" },
+                    { text: "Diploma (3-year)" },
+                    { text: "Diploma (1-year)" },
+                    { text: "Hafiz" },
+                    { text: "Non-Educated" }
+                ]
+            }
+        },
+        event: {
+            dated: { type: "date" },
+            lat: { type: "number",placeholder:"Latitude" },
+            lon: { type: "number",placeholder:"Longitude" },
+            type: {
+                type: "select",
+                options: [
+                    { text: "Select Event Type" },
+                    { text: "Joining" },
+                    { text: "Corner Meeting" },
+                    { text: "Jalsa" },
+                    { text: "Lunch" },
+                    { text: "Dinner" },
+                    { text: "Fund Raising" },
+                    { text: "Party Meeting" },
+                    { text: "Worker Convention" },
+                    { text: "Other" }
+                ]
+            },
+            timing: {
+                type: "select",
+                options: [
+                    { text: "Select Time" },
+                    { text: "12:00 AM" },
+                    { text: "12:30 AM" },
+                    { text: "01:00 AM" },
+                    { text: "01:30 AM" },
+                    { text: "02:00 AM" },
+                    { text: "02:30 AM" },
+                    { text: "03:00 AM" },
+                    { text: "03:30 AM" },
+                    { text: "04:00 AM" },
+                    { text: "04:30 AM" },
+                    { text: "05:00 AM" },
+                    { text: "05:30 AM" },
+                    { text: "06:00 AM" },
+                    { text: "06:30 AM" },
+                    { text: "07:00 AM" },
+                    { text: "07:30 AM" },
+                    { text: "08:00 AM" },
+                    { text: "08:30 AM" },
+                    { text: "09:00 AM" },
+                    { text: "09:30 AM" },
+                    { text: "10:00 AM" },
+                    { text: "10:30 AM" },
+                    { text: "11:00 AM" },
+                    { text: "11:30 AM" },
+
+                    { text: "12:00 PM" },
+                    { text: "12:30 PM" },
+                    { text: "01:00 PM" },
+                    { text: "01:30 PM" },
+                    { text: "02:00 PM" },
+                    { text: "02:30 PM" },
+                    { text: "03:00 PM" },
+                    { text: "03:30 PM" },
+                    { text: "04:00 PM" },
+                    { text: "04:30 PM" },
+                    { text: "05:00 PM" },
+                    { text: "05:30 PM" },
+                    { text: "06:00 PM" },
+                    { text: "06:30 PM" },
+                    { text: "07:00 PM" },
+                    { text: "07:30 PM" },
+                    { text: "08:00 PM" },
+                    { text: "08:30 PM" },
+                    { text: "09:00 PM" },
+                    { text: "09:30 PM" },
+                    { text: "10:00 PM" },
+                    { text: "10:30 PM" },
+                    { text: "11:00 PM" },
+                    { text: "11:30 PM" }
+                ]
+            },
+            is_deleted: {
+                type: "select",
+                options: [
+                    { value: 0, text: "No" },
+                    { value: 1, text: "Yes" }
+                ]
+            }
+        }
+
+        // Add more tables...
+    };
+</script>
+
+<script>
+    $(document).ready(function () {
+
+        // Prevent entire page from refreshing when form is submitted
+        $(document).on("submit", "#frm", function (e) {
+            e.preventDefault();
+        });
+
+        loadTable();
+    });
+
+    const skipColumns = ["id","created_date","modified_date","deleted_date","modified_by"]; // columns to skip
+
+    function loadTable() {
+
+        const table = $("#tableName").val();
+
+        $.get(`/Generic/LoadTable?table=${table}`, function (data) {
+
+            let html = "";
+            const cfg = inputConfig[data.TableName] ?? {};
+
+            // =============================== FORM ===============================
+            html += `<form id='frm'>`;
+            html += `<input type="hidden" id="_editKey" name="_editKey" />`;
+
+            html += `<div class="container-fluid"><div class="row">`;
+            html += `<div class="col-sm-12"><h3><b>${data.TableDescription || data.TableName}</b></h3></div>`;
+
+            let count = 0;
+
+            data.Columns.forEach(c => {
+                if (!skipColumns.includes(c.toLowerCase())) {
+
+                    const colCfg = cfg[c] || { type: "text" };
+
+                    let inputHtml = "";
+
+                    switch (colCfg.type) {
+
+                        case "select":
+                            inputHtml = `<select name="${c}" class="form-control">`;
+
+                            colCfg.options?.forEach(o => {
+
+                                let value, text;
+
+                                // If option is an object ( { value, text } )
+                                if (typeof o === "object") {
+                                    value = o.value ?? o.text; // fallback to text if value not provided
+                                    text = o.text ?? o.value; // fallback to value if text not provided
+                                }
+                                else {
+                                    // If option is a string ("Yes", "No", etc.)
+                                    value = o;
+                                    text = o;
+                                }
+
+                                inputHtml += `<option value="${value}">${text}</option>`;
+                            });
+
+                            inputHtml += `</select>`;
+                            break;
+
+
+                        case "radio":
+                            inputHtml = `<div>`;
+
+                            colCfg.options?.forEach(o => {
+                                const value = typeof o === "object" ? o.value : o;
+                                const text = typeof o === "object" ? o.text : o;
+
+                                inputHtml += `
+                                    <label class="mr-2">
+                                        <input type="radio" name="${c}" value="${value}"> ${text}
+                                    </label>`;
+                            });
+
+                            inputHtml += `</div>`;
+                            break;
+
+                        case "number":
+                            const phNum = colCfg.placeholder ? `placeholder="${colCfg.placeholder}"` : "";
+                            inputHtml = `<input type="number" name="${c}" class="form-control" ${phNum} />`;
+                            break;
+
+                        case "date":
+                            const phDate = colCfg.placeholder ? `placeholder="${colCfg.placeholder}"` : "";
+                            inputHtml = `<input type="date" name="${c}" class="form-control" ${phDate} />`;
+                            break;
+
+                        default:
+                            const max = colCfg.maxlength ? `maxlength="${colCfg.maxlength}"` : "";
+                            const ph = colCfg.placeholder ? `placeholder="${colCfg.placeholder}"` : "";
+                            inputHtml = `<input type="text" name="${c}" class="form-control" ${max} ${ph} />`;
+                    }
+
+
+
+                    html += `
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>${c}</label>
+                        ${inputHtml}
+                    </div>
+                </div>`;
+
+                    count++;
+
+                    if (count % 3 === 0) {
+                        html += `</div><div class="row">`;
+                    }
+                }
+            });
+
+            html += `</div>`; // close row
+            html += `<div class='row'>
+                    <div class="col-sm-12">
+                        <button type="button" onclick="save()" class="btn btn-primary mt-2">Save</button>
+                    </div>
+                </div>
+                </form><hr/>`;
+
+            // =============================== TABLE ===============================
+            html += `<table class='table table-bordered'>
+                    <thead class='bg-primary'>
+                        <tr>`;
+
+            data.Columns.forEach(c => html += `<th>${c}</th>`);
+            html += `<th>Actions</th></tr></thead><tbody>`;
+
+            data.Rows.forEach(r => {
+                html += `<tr>`;
+                data.Columns.forEach(c => html += `<td>${r.Values[c] ?? ""}</td>`);
+
+                const encoded = encodeURIComponent(JSON.stringify(r.Values));
+                const id = r.Values[data.KeyColumn];
+
+                html += `
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick='editRow("${encoded}")'>Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick='deleteRow("${id}")'>Delete</button>
+                </td>`;
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table>`;
+
+            $("#crud-container").html(html);
+
+            window._keyCol = data.KeyColumn;
+        });
+    }
+
+
+    // =============================== EDIT ROW ===============================
+    function editRow(encodedJson) {
+        const row = JSON.parse(decodeURIComponent(encodedJson));
+
+        for (let k in row) {
+            const value = row[k];
+
+            const sel = $(`select[name='${k}']`);
+            if (sel.length) {
+                sel.val(value);
+                continue;
+            }
+
+
+            // Radio
+            const radios = $(`input[type='radio'][name='${k}']`);
+            if (radios.length) {
+                radios.filter(`[value='${value}']`).prop("checked", true);
+                continue;
+            }
+
+            // Normal input
+            $(`[name='${k}']`).val(value);
+        }
+
+        if (row[_keyCol])
+            $("#_editKey").val(row[_keyCol]);
+    }
+
+
+    // =============================== SAVE ===============================
+    function save() {
+
+        const table = $("#tableName").val();
+        let row = { Values: {} };
+
+        $("#frm").find("[name]").each(function () {
+
+            const name = $(this).attr("name");
+            if (name === "_editKey") return;
+
+            if ($(this).attr("type") === "radio") {
+                if ($(this).is(":checked")) {
+                    row.Values[name] = $(this).val();
+                }
+            } else {
+                row.Values[name] = $(this).val();
+            }
+        });
+
+        row.Values[_keyCol] = $("#_editKey").val();
+
+        $.ajax({
+            url: "/Generic/Save",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ table: table, row: row, key: _keyCol }),
+            success: function () {
+                loadTable();
+                $("#frm")[0].reset();
+                $("#_editKey").val("");
+            },
+            error: function (xhr) {
+                alert("Error: " + xhr.responseText);
+            }
+        });
+    }
+
+
+    // =============================== DELETE ===============================
+    function deleteRow(id) {
+
+        if (!confirm("Delete?")) return;
+
+        const table = $("#tableName").val();
+
+        $.ajax({
+            url: "/Generic/Delete",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ table: table, key: _keyCol, id: id }),
+            success: function () {
+                loadTable();
+            },
+            error: function (xhr) {
+                alert("Delete failed: " + xhr.responseText);
+            }
+        });
+    }
+</script>
+

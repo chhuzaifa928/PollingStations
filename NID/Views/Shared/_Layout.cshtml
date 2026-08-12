@@ -1,0 +1,416 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
+
+    <style>
+        .rp {
+            padding-left: 7px;
+            padding-right: 7px;
+        }
+
+        p {
+            margin-bottom: 0px;
+        }
+
+        .ntb, select {
+            border: none;
+            border-radius: 3px;
+            color: white;
+            background-color: #54aba0;
+            margin-right: 3px;
+            margin-top: 2px;
+            min-width: 32px;
+            height: 28px;
+        }
+
+        select {
+            margin-left: 2px;
+        }
+
+        option {
+            color: black;
+            background-color: white;
+        }
+
+        .chart {
+            height: 360px;
+            padding-top: 5px;
+        }
+
+        .partition {
+            border-radius: 5px;
+            padding: 3px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            background-color: teal;
+        }
+
+        .capsule {
+            position: relative;
+            padding: 7px 12px;
+            opacity: 0.8;
+            border-radius: 7px;
+            margin-top: 15px;
+            background-color: teal;
+        }
+
+            .capsule span {
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+
+            .info.hover {
+                position: absolute;
+                right: 50px;
+                left: auto;
+                width: 100px;
+            }
+
+            .info h4 {
+                margin: 0 0 5px;
+                color: #777;
+            }
+
+        .leaflet-right.leaflet-top {
+            right: 10px;
+            left: auto;
+        }
+
+        .legend {
+            text-align: left;
+            line-height: 18px;
+            color: #555;
+        }
+
+            .legend i {
+                width: 18px;
+                height: 18px;
+                float: left;
+                margin-right: 8px;
+                opacity: 0.7;
+            }
+
+        .top-curve {
+            border-radius: 10px 10px 0px 0px;
+            color: black;
+            font-weight: bold;
+        }
+
+        .bottom-curve {
+            border-radius: 0px 0px 10px 10px;
+        }
+
+        .tdhead {
+            border-top: none;
+            width: 34%;
+        }
+
+        .prvtbl {
+            font-size: 13px;
+        }
+
+            .prvtbl td {
+                padding: 5px !important;
+            }
+
+            .prvtbl tr > td:not(:nth-child(1)) {
+                text-align: center;
+            }
+
+            .prvtbl tr > td:nth-child(1) {
+                font-weight: bold;
+            }
+
+        #cdate, #pdate, #ldate {
+            font-size: 12px;
+            font-weight: bold;
+            color: blue;
+        }
+
+        td.td1 {
+            background-color: #fcb0fd;
+            color: black;
+            width: 22%;
+        }
+
+        td.td2 {
+            background-color: #adfdfd;
+            color: black;
+            width: 22%;
+        }
+
+        td.td3 {
+            background-color: #bdffbd;
+            color: black;
+            width: 22%;
+        }
+
+
+        @@media (min-width: 767px) {
+            .logo-area img, .lgo {
+                float: left;
+            }
+
+            .userbtn {
+                float: right;
+            }
+        }
+
+        @@media (max-width: 767px) {
+            .logo-area {
+                text-align: center;
+            }
+
+            .userbtn {
+                text-align: center;
+            }
+        }
+
+        .prvtbl td a {
+            font-size: 12px;
+        }
+
+        .chart {
+            background-color: white;
+        }
+
+        .ntb.active {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .partition button, .partition select {
+            margin-bottom: 5px;
+        }
+
+        .card {
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        .bg-c-blue {
+            background: linear-gradient(90deg, #007f7f, #4caba0);
+        }
+
+        .bg-c-green {
+            background: linear-gradient(90deg, #007f7f, #4caba0);
+        }
+
+        .order-card {
+            color: #fff;
+        }
+
+        .card {
+            color: white;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, .125);
+            border-radius: .50rem;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .card-val {
+            font-size: 18px;
+        }
+
+        .card-icon {
+            position: absolute;
+            right: 10px;
+            top: 15px;
+            font-size: 48px !important;
+            color: whitesmoke;
+        }
+        .fi{
+            font-size:20px;
+        }
+        .map-value {
+            font-size: 16px;
+        }
+    </style>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body style="background-color:#F6F8FA;">
+    <div style="background-color:teal; color:white; padding:5px;">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-4 col-sm-12 rp" style="margin-bottom:0px;">
+                    <div class="logo-area">
+                        <img src="~/Content/img/pak.png" style="height:45px; width:50px; margin-right:7px;">
+                        <div class="lgo">
+                            <p style="font-weight:bold; margin-bottom:0px; margin-top:4px; font-size:16px;">Diaspora Database Dashboard (D3)</p>
+                            <p style="margin-bottom:0px;">Federal Government of Pakistan</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8 col-sm-12 rp" style="margin-bottom:0px;">
+                    <div class="userbtn">
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle" type="button" data-toggle="dropdown" style="height:45px; background-color:#048d8d; color:white;">
+                                Welcome! <b>PBS</b>
+                                <span class="glyphicon glyphicon-user" style="border-radius: 50%; width: 30px; height: 30px; background-color: teal; padding-top: 7px;"></span>
+                            </button>
+                            <ul class="dropdown-menu" style="min-width: 140px;">
+                                <li><a href="#">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 rp">
+                <nav class="navbar" style="margin-top:10px; margin-bottom:10px; background-color:white">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="/Diaspora/Migration">Home</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="myNavbar">
+                            <ul class="nav navbar-nav">
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        Regions
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#">Middle East</a></li>
+                                        <li><a href="#">Europe</a></li>
+                                        <li><a href="#">North America</a></li>
+                                        <li><a href="#">Soth America</a></li>
+                                        <li><a href="#">Asia</a></li>
+                                        <li><a href="#">Austrailia</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#">Remmitances</a></li>
+                                <li class="active"><a href="#">Sectors</a></li>
+                                <li><a href="#">Promotors</a></li>
+                                <li><a href="#">Missions</a></li>
+                                <li><a href="#">International Comparison</a></li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        Downloads
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#">UN Annual Reports </a></li>
+                                        <li><a href="#">IOM Reports</a></li>
+                                        <li><a href="#">ICMPD (Intl Cen for Migration Policy Dev)</a></li>
+                                        <li><a href="#">Migration Policy Centre</a></li>
+                                        <li><a href="#">Bonn Research Institute for Migration Studies</a></li>
+                                        <li><a href="#">Global Forum on Migration and Dev (GFMD)</a></li>
+                                        <li><a href="#">Migration Policy Gp</a></li>
+                                        <li><a href="#">Centre for Diaspora Studies</a></li>
+                                        <li><a href="#">African Diaspora Policy Centre</a></li>
+                                        <li><a href="#">Diaspora Engagement Think Tank (DETT)</a></li>
+                                        <li><a href="#">Other Think Tanks</a></li>
+                                        <li><a href="#">University Centres on Migration & Dispora</a></li>
+                                        <li><a href="#">INGOs/ NGOs</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        Organizations
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="#">
+                                                BE&OE (Bureau of Emigration & Overseas Emp)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                PBS (Pakistan Bureau of Statistics)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                OEC (Overseas Emp Corp)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                OPF (Overseas Pakistanis Foundation)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                WWF (Workers Welfare Fund)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                DWE (Dte of Workers Edn)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                EOBI (Emp Oldage Benefits Institution)
+                                            </a>
+                                        </li>
+                                        <li><a href="#"> NIRC (Nat’l Industrial Relations Commission Isb)</a></li>
+                                    </ul>
+                                </li>
+
+                                <li><a href="/Diaspora/Reports">Reports</a></li>
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+                                <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                
+            </div>
+        </div>
+        <main>
+            @RenderBody()
+        </main>
+
+    </div>
+    <div style="padding:5px; background-color:teal; color:white; text-align:center; position:static; font-size:14px; font-weight:bold; bottom:0; width:100%;">
+        <p>Powered By: DP Center, Support Services Wing <p>&copy; @DateTime.Now.Year</p></p>
+        <p>Pakistan Bureau of Statistics</p>
+    </div>
+    <script src="~/script/jquery-3.4.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/accessibility.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/pattern-fill.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+

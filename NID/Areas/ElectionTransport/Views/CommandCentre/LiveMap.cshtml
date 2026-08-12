@@ -1,0 +1,39 @@
+@model NID.Areas.ElectionTransport.Models.TransportPageViewModel
+@{ ViewBag.Title = "Election Transport Live Map"; }
+@Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportAssets.cshtml")
+<div class="et-page">
+    @Html.Partial("~/Areas/ElectionTransport/Views/Shared/_TransportNav.cshtml", Model)
+    @Html.AntiForgeryToken()
+    <div class="et-shell et-toolbar">
+        <div class="et-field"><label>Search</label><input id="et-filter-search" class="et-input" placeholder="Registration, driver, mobile, provider or polling station" /></div>
+        <div class="et-field"><label>Status</label><select id="et-filter-status" class="et-select"><option value="">All statuses</option><option>Moving</option><option>Approaching</option><option>AtPollingStation</option><option>Idle</option><option>Offline</option><option>NeverActivated</option></select></div>
+        <div class="et-field"><label>Vehicle type</label><select id="et-filter-type" class="et-select"><option value="">All types</option></select></div>
+        <div class="et-field"><label>Provider</label><select id="et-filter-provider" class="et-select"><option value="">All providers</option></select></div>
+        <div class="et-field"><label>Polling station</label><select id="et-filter-station" class="et-select"><option value="">All stations</option></select></div>
+        <button id="et-apply-map-filter" class="et-btn primary" type="button">Apply</button>
+        <button id="et-clear-map-filter" class="et-btn light" type="button">Clear</button>
+    </div>
+    <div class="et-grid">
+        <article class="et-card et-span-9"><div class="et-card-body"><div class="et-card-head"><div><h2>Live transport movement</h2><div class="et-sub">Click a vehicle to inspect its current state and recent route trail.</div></div><div><span id="et-map-count" class="et-badge blue">0 vehicles</span> <button id="et-map-refresh" type="button" class="et-btn small navy">Refresh</button> @if (Model.AllowDemoAdministration && Model.SelectedContext.IsDemoMode) { <button id="et-map-demo" type="button" class="et-btn small green-light">Start dummy movement</button> }</div></div><div id="et-live-map" class="et-map large"></div><div class="et-map-legend"><span>Updated: <strong id="et-map-updated">Connecting…</strong></span><span>100m polling-station buffers shown in green</span></div></div></article>
+        <article class="et-card et-span-3"><div class="et-card-body"><div class="et-card-head"><div><h2>Visible vehicles</h2><div class="et-sub">Filtered operational list.</div></div></div><div id="et-live-vehicle-list" class="et-side-list"><div class="et-empty">Loading vehicles…</div></div></div></article>
+    </div>
+</div>
+@section scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="@Url.Content("~/Scripts/ElectionTransport/transport.core.js")"></script>
+    <script src="@Url.Content("~/Scripts/ElectionTransport/transport.live-map.js")"></script>
+    <script>
+        ElectionTransport.LiveMap.init({
+            contextId: @Model.ElectionContextId,
+            refreshSeconds: @Model.RefreshSeconds,
+            demoTickSeconds: @Model.DemoTickSeconds,
+            trailMinutes: @Model.TrailMinutes,
+            geofenceRadius: @Model.SelectedContext.GeofenceRadiusMeters,
+            mapUrl: '@Url.Action("Map", "TransportApi", new { area = "ElectionTransport" })',
+            trailUrl: '@Url.Action("VehicleTrail", "TransportApi", new { area = "ElectionTransport" })',
+            simulationUrl: '@Url.Action("SimulationTick", "TransportApi", new { area = "ElectionTransport" })',
+            vehicleDetailsUrl: '@Url.Action("Vehicle", "CommandCentre", new { area = "ElectionTransport", id = "__id__" })',
+            stationDetailsUrl: '@Url.Action("PollingStation", "CommandCentre", new { area = "ElectionTransport", id = "__id__" })'
+        });
+    </script>
+}
